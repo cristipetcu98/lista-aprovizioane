@@ -158,8 +158,39 @@ async function downloadPDF(){
 }
 function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");window.scrollTo({top:0,behavior:"smooth"})}
 async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
-function saveHistory(){if(!lastList)return;let h=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");h.unshift(lastList);localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h.slice(0,50)));showHistory();alert("Lista a fost salvată în istoric.")}
-function showHistory(){let h=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");$("history").innerHTML=h.length?h.map((x,i)=>`<div style="padding:8px 0;border-top:1px solid var(--line)"><b>${esc(x.date)}</b> · ${Object.values(x.groups).flat().length} produse</div>`).join(""):"Nicio listă salvată încă."}
+function readHistory(){
+ try{const value=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");return Array.isArray(value)?value.filter(x=>x&&x.groups&&typeof x.groups==="object"):[]}
+ catch(e){console.error("Istoricul nu poate fi citit",e);return []}
+}
+function saveHistory(){
+ if(!lastList){alert("Generează mai întâi lista.");return}
+ try{
+  const h=readHistory();
+  const entry={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),date:lastList.date,note:lastList.note||"",groups:JSON.parse(JSON.stringify(lastList.groups))};
+  h.unshift(entry);localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h.slice(0,50)));showHistory();
+  alert("Lista a fost salvată. O poți redeschide din secțiunea «Liste salvate».");
+ }catch(e){console.error(e);alert("Nu am putut salva lista pe acest dispozitiv. Verifică spațiul disponibil și permisiunile Safari.")}
+}
+function openSavedList(index){
+ const h=readHistory(),item=h[index];if(!item)return;
+ lastList={date:item.date,note:item.note||"",groups:item.groups};
+ $("resultDate").textContent=lastList.date;
+ $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
+ $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
+ $("catalog").style.display="none";$("result").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});
+}
+function deleteSavedList(index){
+ if(!confirm("Ștergi această listă salvată?"))return;
+ const h=readHistory();h.splice(index,1);
+ try{localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h));showHistory()}catch(e){alert("Nu am putut actualiza istoricul.")}
+}
+function showHistory(){
+ const h=readHistory();
+ $("history").innerHTML=h.length?h.map((x,i)=>{
+  const count=Object.values(x.groups).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
+  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button class="secondary" onclick="openSavedList(${i})">Deschide</button><button class="plain" onclick="deleteSavedList(${i})">Șterge</button></div></div>`
+ }).join(""):"Nicio listă salvată încă.";
+}
 $("search").addEventListener("input",render);render();showHistory();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body></html>
