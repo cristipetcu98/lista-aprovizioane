@@ -1,258 +1,80 @@
 <!doctype html>
 <html lang="ro">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5f8f5">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Lista Aprovizionare">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Lista Aprovizionare</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f8f5"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Lista Aprovizionare">
+<link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png"><title>Lista Aprovizionare</title>
 <style>
-:root{--green:#23784b;--dark:#174b35;--pale:#eaf3ec;--bg:#f5f7f5;--line:#e4e9e5;--muted:#77827a}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:#17221a;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
-header{padding:calc(env(safe-area-inset-top) + 18px) 20px 18px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.brand{font-size:12px;letter-spacing:1.5px;color:var(--green);font-weight:750}.heading{font-size:28px;font-weight:750;margin:5px 0 2px}.sub{font-size:13px;color:var(--muted)}
-main{max-width:720px;margin:auto;padding:16px 16px 110px}
-.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:13px;box-shadow:0 2px 8px #17221a08}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.section-title{font-size:17px;font-weight:720}.count{font-size:12px;color:var(--muted)}
-.search{width:100%;border:0;background:#f1f4f1;border-radius:12px;padding:13px 14px;font:inherit;outline:none;margin:12px 0}
-.category{margin-bottom:12px;scroll-margin-top:115px}.category h2{font-size:17px;margin:0 0 9px}
-.product{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid #eff2ef;font-size:15px;touch-action:pan-y;transition:background .15s}.product:first-of-type{border-top:0}
-.category-head{touch-action:pan-y;border-radius:9px;transition:background .15s}.swipe-hint{font-size:10px;color:#a33d31;font-weight:600;margin-left:auto;white-space:nowrap}.swipe-armed{background:#fff0ee!important}
-input[type=checkbox]{appearance:none;width:22px;height:22px;border:1.7px solid #bac7bd;border-radius:7px;margin:0;flex:0 0 22px;background:white}
-input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}input[type=checkbox]:checked:after{content:"✓";display:block;color:white;text-align:center;font-size:15px;font-weight:700;line-height:20px}
-button{font:inherit;border:0;border-radius:12px;padding:11px 14px;font-weight:650;cursor:pointer}
-.primary{background:var(--green);color:white}.secondary{background:var(--pale);color:var(--dark)}.plain{background:#f1f4f1;color:#26352a}.danger{background:#fff0ee;color:#a33d31}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{font-size:13px}
-.sticky{position:fixed;bottom:0;left:0;right:0;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);background:#ffffffed;backdrop-filter:blur(16px);border-top:1px solid var(--line);z-index:6}
-.sticky-inner{max-width:720px;margin:auto;display:flex;align-items:center;gap:12px}.sticky .primary{flex:1;padding:15px}
-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button{white-space:nowrap;font-size:12px;padding:9px 12px}
-input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:white;outline-color:var(--green)}
-label{font-size:13px;font-weight:650;display:block;margin:10px 0 6px}
-dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow:0 15px 50px #0003}dialog::backdrop{background:#10201666}.modal-title{font-size:20px;font-weight:750;margin:0 0 12px}
-.small{font-size:12px;color:var(--muted)}.empty{padding:18px 4px;color:var(--muted);font-size:14px}
-#result{display:none}#result.show{display:block}.note{white-space:pre-wrap;background:#f1f5f1;border-radius:12px;padding:13px;font-size:14px}
-.result-group{margin:15px 0}.result-group h3{font-size:15px;color:var(--green);margin:0 0 7px}.result-item{padding:5px 0;font-size:14px}
-@media print{@page{size:auto;margin:14mm}body{background:white;color:#111}header,.no-print,.sticky{display:none!important}main{padding:0}.panel{border:0;box-shadow:none;padding:0}#catalog{display:none!important}#result{display:block!important}.note{border:1px solid #ddd;background:white}}
-.pdf-export{background:#fff;color:#17221a;padding:24px;width:720px;font-family:Arial,sans-serif}.pdf-export h2{font-size:22px;margin:0 0 8px}.pdf-export .result-group{break-inside:avoid;page-break-inside:avoid}.pdf-export .result-group h3{border-bottom:1px solid #dce6dd;padding-bottom:6px}.pdf-export .result-item{font-size:15px;padding:7px 0}
-</style>
-</head>
+:root{--green:#23784b;--dark:#174b35;--pale:#eaf3ec;--bg:#f5f7f5;--line:#e4e9e5;--muted:#77827a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#17221a;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}header{padding:calc(env(safe-area-inset-top) + 18px) 20px 18px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.brand{font-size:12px;letter-spacing:1.5px;color:var(--green);font-weight:750}.heading{font-size:28px;font-weight:750;margin:5px 0 2px}.sub{font-size:13px;color:var(--muted)}main{max-width:720px;margin:auto;padding:16px 16px calc(120px + env(safe-area-inset-bottom))}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:13px;box-shadow:0 2px 8px #17221a08}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.section-title{font-size:17px;font-weight:720}.count,.small{font-size:12px;color:var(--muted)}.search{width:100%;border:0;background:#f1f4f1;border-radius:12px;padding:13px 14px;font:inherit;outline:none;margin:12px 0}.category{margin-bottom:12px;scroll-margin-top:115px}.category h2{font-size:17px;margin:0 0 9px}.product{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid #eff2ef;font-size:15px;touch-action:pan-y;transition:background .15s}.product:first-of-type{border-top:0}.category-head{touch-action:pan-y;border-radius:9px;transition:background .15s;min-height:32px}.swipe-hint{font-size:10px;color:#a33d31;font-weight:600;margin-left:auto;white-space:nowrap}input[type=checkbox]{appearance:none;width:22px;height:22px;border:1.7px solid #bac7bd;border-radius:7px;margin:0;flex:0 0 22px;background:white}input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}input[type=checkbox]:checked:after{content:"✓";display:block;color:white;text-align:center;font-size:15px;font-weight:700;line-height:20px}button{font:inherit;border:0;border-radius:12px;padding:11px 14px;font-weight:650;cursor:pointer}.primary{background:var(--green);color:white}.secondary{background:var(--pale);color:var(--dark)}.plain{background:#f1f4f1;color:#26352a}.danger{background:#fff0ee;color:#a33d31}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{font-size:13px}.sticky{position:fixed;bottom:0;left:0;right:0;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);background:#ffffffed;backdrop-filter:blur(16px);border-top:1px solid var(--line);z-index:6}.sticky-inner{max-width:720px;margin:auto;display:flex;align-items:center;gap:12px}.sticky .primary{flex:1;padding:15px}nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button{white-space:nowrap;font-size:12px;padding:9px 12px}input[type=text],textarea,select{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;font:inherit;background:white;outline-color:var(--green)}label.field{font-size:13px;font-weight:650;display:block;margin:10px 0 6px}dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow:0 15px 50px #0003}dialog::backdrop{background:#10201666}.modal-title{font-size:20px;font-weight:750;margin:0 0 12px}.empty{padding:18px 4px;color:var(--muted);font-size:14px}#result{display:none}#result.show{display:block}.note{white-space:pre-wrap;background:#f1f5f1;border-radius:12px;padding:13px;font-size:14px}.result-group{margin:15px 0;break-inside:avoid;page-break-inside:avoid}.result-group h3{font-size:15px;color:var(--green);margin:0 0 7px;border-bottom:1px solid #dce6dd;padding-bottom:6px}.result-item{padding:6px 0;font-size:14px}.supplier-chip{display:inline-flex;align-items:center;gap:6px;background:#f3f6f3;border-radius:10px;padding:8px 10px;margin:4px 5px 0 0;font-size:13px}.supplier-chip button{padding:4px 7px;font-size:11px}.history-item{padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.history-item .actions{margin:0}.muted{color:var(--muted)}.hidden{display:none!important}.pdf-export{background:#fff;color:#17221a;padding:24px;width:720px;font-family:Arial,sans-serif}@media print{@page{size:auto;margin:14mm}body{background:white;color:#111}header,.no-print,.sticky{display:none!important}main{padding:0}.panel{border:0;box-shadow:none;padding:0}#catalog{display:none!important}#result{display:block!important}.note{border:1px solid #ddd;background:white}}
+</style></head>
 <body>
-<header><div class="brand">LISTĂ DE APROVIZIONARE</div><div class="heading">Aprovizionare</div><div class="sub">Bifează produsele care lipsesc. Lista se organizează automat.</div></header>
+<header><div class="brand">LISTĂ DE APROVIZIONARE</div><div class="heading">Lista Aprovizionare</div><div class="sub">Bifează produsele care lipsesc. Lista se organizează automat.</div></header>
 <main>
 <section id="catalog">
- <div class="panel no-print">
-  <div class="row"><div class="section-title">Produse</div><div class="count" id="selectedCount">0 selectate</div></div>
-  <input id="search" class="search" placeholder="Caută un produs..." autocomplete="off">
-  <nav id="jumpNav"></nav>
-  <div id="categories"></div>
-  <div class="actions">
-   <button class="secondary" onclick="openProduct()">＋ Adaugă produs</button>
-   <button class="plain" onclick="openSupplier()">＋ Adaugă furnizor</button>
-   <button class="plain" onclick="openCategory()">＋ Adaugă categorie</button>
-  </div>
- </div>
- <div class="panel no-print">
-  <div class="row"><div class="section-title">Notă de informare</div><span class="small">opțională</span></div>
-  <textarea id="note" rows="3" placeholder="Scrie aici nota care va apărea sus în lista finală..."></textarea>
-  <div class="small" style="margin-top:7px">Nota poate fi modificată pentru fiecare listă.</div>
- </div>
+ <div class="panel no-print"><div class="row"><div class="section-title">Produse</div><div class="count" id="selectedCount">0 selectate</div></div><input id="search" class="search" placeholder="Caută un produs..." autocomplete="off"><nav id="jumpNav" aria-label="Navigare categorii"></nav><div id="categories"></div>
+ <div class="actions"><button class="secondary" id="addProductBtn">＋ Adaugă produs</button><button class="plain" id="addSupplierBtn">＋ Adaugă furnizor</button><button class="plain" id="addCategoryBtn">＋ Adaugă categorie</button></div></div>
+ <div class="panel no-print"><div class="row"><div class="section-title">Furnizori</div><span class="small">gestionează furnizorii</span></div><div id="supplierManager" style="margin-top:8px"></div></div>
+ <div class="panel no-print"><div class="row"><div class="section-title">Notă pentru listă</div><span class="small">opțională</span></div><textarea id="note" rows="3" placeholder="Ex. Aprovizionare pentru magazin – livrare dimineață"></textarea><div class="small" style="margin-top:7px">Notița se salvează doar în lista generată.</div></div>
 </section>
-<section id="result">
- <div class="panel">
-  <div class="row"><div class="section-title">Lista de aprovizionare</div><span class="small" id="resultDate"></span></div>
-  <div id="resultNote" style="margin-top:12px"></div>
-  <div id="resultGroups"></div>
-  <div class="actions no-print">
-   <button class="primary" onclick="downloadPDF()">Descarcă PDF</button>
-   <button class="secondary" onclick="shareList()">Partajează</button>
-   <button class="plain" onclick="backToEdit()">Înapoi la produse</button>
-   <button class="secondary" onclick="startNewList()">＋ Generează o nouă listă</button>
-   <button class="plain" onclick="saveHistory()">Salvează în istoric</button>
-  </div>
- </div>
-</section>
-<section class="panel no-print">
- <div class="row"><div class="section-title">Liste salvate</div><button class="plain" onclick="showHistory()">Vezi istoricul</button></div>
- <div id="history" class="small" style="margin-top:8px">Nicio listă salvată încă.</div>
-</section>
+<section id="result"><div class="panel"><div class="row"><div class="section-title">Lista de aprovizionare</div><span class="small" id="resultDate"></span></div><div id="resultNote" style="margin-top:12px"></div><div id="resultGroups"></div><div class="actions no-print"><button class="primary" id="pdfBtn">Descarcă PDF</button><button class="secondary" id="shareBtn">Distribuie</button><button class="plain" id="copyBtn">Copiază</button><button class="plain" id="printBtn">Printează</button><button class="plain" id="backBtn">Înapoi la produse</button></div><div class="actions no-print"><button class="secondary" id="newListBtn" style="width:100%;padding:14px">＋ Generează o nouă listă</button></div></div></section>
+<section class="panel no-print" id="historyPanel"><div class="row"><div class="section-title">Istoricul listelor</div><button class="plain" id="historyRefresh">Reîncarcă</button></div><div id="history" class="small" style="margin-top:8px">Nicio listă salvată încă.</div></section>
+<div class="small" style="text-align:center;padding:8px 4px">Datele sunt păstrate local pe acest dispozitiv și browser. Nu există sincronizare în cloud.</div>
 </main>
 <div class="sticky no-print"><div class="sticky-inner"><div><b id="stickyCount">0 produse</b><div class="small">selectate</div></div><button class="primary" id="generateBtn" type="button">Generează lista →</button></div></div>
-
-<dialog id="productModal">
- <h2 class="modal-title">Adaugă produs</h2>
- <label>Denumire produs</label><input id="productName" type="text" placeholder="Ex. Orez">
- <label>Categorie</label><select id="productCategory"></select>
- <label>Destinație</label><select id="productSupplier"></select>
- <div class="small">Furnizorul este opțional. Dacă nu alegi unul, produsul rămâne în categoria sa.</div>
- <div class="actions"><button class="primary" onclick="addProduct()">Salvează</button><button class="plain" onclick="closeModal('productModal')">Anulează</button></div>
-</dialog>
-<dialog id="supplierModal">
- <h2 class="modal-title">Adaugă furnizor</h2><label>Denumire furnizor</label><input id="supplierName" type="text" placeholder="Ex. Isis">
- <div class="actions"><button class="primary" onclick="addSupplier()">Salvează</button><button class="plain" onclick="closeModal('supplierModal')">Anulează</button></div>
-</dialog>
-<dialog id="categoryModal">
- <h2 class="modal-title">Adaugă categorie</h2><label>Denumire categorie</label><input id="categoryName" type="text" placeholder="Ex. Legume">
- <div class="actions"><button class="primary" onclick="addCategory()">Salvează</button><button class="plain" onclick="closeModal('categoryModal')">Anulează</button></div>
-</dialog>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<dialog id="productModal"><h2 class="modal-title" id="productModalTitle">Adaugă produs</h2><label class="field" for="productName">Denumire produs</label><input id="productName" type="text" placeholder="Ex. Orez"><label class="field" for="productCategory">Categorie</label><select id="productCategory"></select><label class="field" for="productSupplier">Furnizor (opțional)</label><select id="productSupplier"></select><div class="actions"><button class="primary" id="saveProductBtn">Salvează</button><button class="danger hidden" id="deleteProductBtn">Șterge produsul</button><button class="plain" id="cancelProductBtn">Anulează</button></div></dialog>
+<dialog id="categoryModal"><h2 class="modal-title" id="categoryModalTitle">Adaugă categorie</h2><label class="field" for="categoryName">Denumire categorie</label><input id="categoryName" type="text" placeholder="Ex. Congelate"><div class="actions"><button class="primary" id="saveCategoryBtn">Salvează</button><button class="danger hidden" id="deleteCategoryBtn">Șterge categoria</button><button class="plain" id="cancelCategoryBtn">Anulează</button></div></dialog>
+<dialog id="supplierModal"><h2 class="modal-title" id="supplierModalTitle">Adaugă furnizor</h2><label class="field" for="supplierName">Denumire furnizor</label><input id="supplierName" type="text" placeholder="Ex. Isis"><div class="actions"><button class="primary" id="saveSupplierBtn">Salvează</button><button class="plain" id="cancelSupplierBtn">Anulează</button></div></dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <script>
+'use strict';
 const DEFAULT_CATS=["Legume","Fructe","Băcănie","Băuturi","Lactate","Dulciuri și snacksuri","Pâine și panificație","Ouă","Produse nealimentare","Alte produse"];
-let db=JSON.parse(localStorage.getItem("lista-aprovizionare-db")||"null")||{categories:DEFAULT_CATS,suppliers:[],products:[]};
-let selected=new Set(), lastList=null;
-const $=id=>document.getElementById(id);
-function persist(){localStorage.setItem("lista-aprovizionare-db",JSON.stringify(db))}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function groups(){return [...db.suppliers]}
-db.products.forEach(p=>{if(p.supplier==="Comandă clasică")p.supplier=""});
-db.suppliers=db.suppliers.filter(s=>s!=="Comandă clasică");
-function render(){
- const q=$("search").value.trim().toLocaleLowerCase("ro");$("categories").innerHTML="";
- const all=[...db.categories,...groups()];
- $("jumpNav").innerHTML=all.map((c,i)=>`<button class="secondary" onclick="document.getElementById('sec${i}').scrollIntoView({behavior:'smooth',block:'start'})">${esc(c)}</button>`).join("");
- all.forEach((cat,i)=>{
-  let items=db.products.filter(p=>(db.categories.includes(cat)?p.category===cat:p.supplier===cat)&&p.name.toLocaleLowerCase("ro").includes(q));
-  const section=document.createElement("section");section.className="panel category";section.id="sec"+i;
-  const isMainCategory=db.categories.includes(cat);
-  section.innerHTML=`<div class="row category-head" ${isMainCategory?`data-category-swipe="${esc(cat)}"`:''}><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span>${isMainCategory?'<span class="swipe-hint">Glisează pentru ștergere</span>':''}</div>`+
-   (items.length?items.map(p=>`<label class="product" data-product-swipe="${esc(p.id)}"><input type="checkbox" ${selected.has(p.id)?"checked":""} onchange="toggle('${p.id}',this.checked)"><span>${esc(p.name)}</span><button type="button" class="plain" style="margin-left:auto;padding:5px 8px" onclick="event.preventDefault();event.stopPropagation();editProduct('${p.id}')">•••</button></label>`).join(""):`<div class="empty">${q?"Niciun produs găsit.":"Produsele vor fi adăugate aici când dictezi catalogul."}</div>`);
-  $("categories").appendChild(section);
- });
- updateCount();
-}
-function deleteProductById(id){
- const p=db.products.find(x=>x.id===id);if(!p)return;
- if(!confirm(`Ștergi produsul „${p.name}”?`))return;
- db.products=db.products.filter(x=>x.id!==id);selected.delete(id);persist();render();
-}
-function deleteCategoryByName(name){
- if(!name||!db.categories.includes(name))return;
- const count=db.products.filter(p=>p.category===name).length;
- const message=count?`Ștergi categoria „${name}” și cele ${count} produse din ea? Această acțiune nu poate fi anulată.`:`Ștergi categoria „${name}”?`;
- if(!confirm(message))return;
- const removedIds=db.products.filter(p=>p.category===name).map(p=>p.id);
- db.products=db.products.filter(p=>p.category!==name);removedIds.forEach(id=>selected.delete(id));
- db.categories=db.categories.filter(c=>c!==name);persist();render();
-}
-// Detectează doar glisări orizontale clare spre stânga; derularea verticală rămâne normală.
-(function enableSwipeDelete(){
- const root=$("categories");let start=null;
- root.addEventListener("pointerdown",event=>{
-  if(event.pointerType==="mouse")return;
-  const target=event.target.closest("[data-product-swipe], [data-category-swipe]");
-  if(!target)return;
-  start={target,x:event.clientX,y:event.clientY};
- },{passive:true});
- root.addEventListener("pointerup",event=>{
-  if(!start)return;
-  const dx=event.clientX-start.x,dy=event.clientY-start.y,target=start.target;start=null;
-  if(dx<=-75&&Math.abs(dx)>Math.abs(dy)*1.35){
-   if(target.dataset.productSwipe)deleteProductById(target.dataset.productSwipe);
-   else if(target.dataset.categorySwipe)deleteCategoryByName(target.dataset.categorySwipe);
-  }
- },{passive:true});
- root.addEventListener("pointercancel",()=>{start=null;},{passive:true});
-})();
-function toggle(id,on){on?selected.add(id):selected.delete(id);updateCount()}
-function updateCount(){$("selectedCount").textContent=selected.size+" selectate";$("stickyCount").textContent=selected.size+" produse"}
-function openProduct(){
- $("productCategory").innerHTML=db.categories.map(c=>`<option>${esc(c)}</option>`).join("");
- $("productSupplier").innerHTML=`<option value="">Fără furnizor</option>`+db.suppliers.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("");
- $("productModal").showModal()
-}
-function addProduct(){let name=$("productName").value.trim(),category=$("productCategory").value,supplier=$("productSupplier").value;if(!name)return alert("Introdu denumirea produsului.");db.products.push({id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),name,category,supplier:supplier||""});persist();$("productName").value="";closeModal("productModal");render()}
-function editProduct(id){let p=db.products.find(x=>x.id===id);if(!p)return;let name=prompt("Modifică denumirea produsului:",p.name);if(name===null)return;if(!name.trim()){if(confirm("Ștergi produsul?")){db.products=db.products.filter(x=>x.id!==id);selected.delete(id)}}else p.name=name.trim();persist();render()}
-function openSupplier(){$("supplierModal").showModal()}
-function addSupplier(){let s=$("supplierName").value.trim();if(!s)return;if(!db.suppliers.some(x=>x.toLocaleLowerCase("ro")===s.toLocaleLowerCase("ro")))db.suppliers.push(s);$("supplierName").value="";persist();closeModal("supplierModal");render()}
-function openCategory(){$("categoryModal").showModal()}
-function addCategory(){let c=$("categoryName").value.trim();if(!c)return;if(!db.categories.includes(c))db.categories.push(c);$("categoryName").value="";persist();closeModal("categoryModal");render()}
-function closeModal(id){$(id).close()}
-window.generate = function(){
- try {
- let chosen=db.products.filter(p=>selected.has(p.id));if(!chosen.length){alert("Nu ai selectat niciun produs. Bifează produsele dorite și apasă din nou «Generează lista».");return;}
- lastList={date:new Date().toLocaleString("ro-RO"),note:$("note").value.trim(),groups:{}};
- chosen.forEach(p=>{const destination=p.supplier||p.category;(lastList.groups[destination]??=[]).push(p.name)});
- $("resultDate").textContent=lastList.date;
- $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
- $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
- $("catalog").style.display="none";$("result").classList.add("show");document.querySelector(".sticky").style.display="none";window.scrollTo({top:0,behavior:"smooth"});
- } catch(err) { console.error("Eroare la generarea listei:",err); alert("Nu am putut genera lista. Reîncarcă pagina și încearcă din nou."); }
-};
-async function downloadPDF(){
- if(!lastList){alert("Generează mai întâi lista.");return;}
- if(typeof html2pdf==="undefined"){alert("Modulul PDF nu s-a încărcat. Verifică conexiunea la internet și încearcă din nou.");return;}
- const source=$("result").querySelector(".panel").cloneNode(true);
- source.querySelectorAll(".actions,.no-print").forEach(el=>el.remove());
- source.classList.add("pdf-export");
- source.style.width="720px";source.style.maxWidth="720px";source.style.margin="0";source.style.border="0";source.style.boxShadow="none";
- const holder=document.createElement("div");holder.style.position="fixed";holder.style.left="0";holder.style.top="0";holder.style.zIndex="-1000";holder.style.background="#fff";holder.appendChild(source);document.body.appendChild(holder);
- const safeDate=new Date().toISOString().slice(0,10);
- try{await html2pdf().set({margin:[12,12,12,12],filename:`Lista-aprovizionare-${safeDate}.pdf`,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(source).save();}
- catch(err){console.error(err);alert("Nu am reușit să creez PDF-ul. Încearcă din nou.");}
- finally{holder.remove();}
-}
-function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
-function startNewList(){
- selected.clear();lastList=null;$("note").value="";updateCount();render();
- $("catalog").style.display="block";$("result").classList.remove("show");
- document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"});
-}
-async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
-function readHistory(){
- try{const value=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");return Array.isArray(value)?value.filter(x=>x&&x.groups&&typeof x.groups==="object"):[]}
- catch(e){console.error("Istoricul nu poate fi citit",e);return []}
-}
-function saveHistory(){
- if(!lastList){alert("Generează mai întâi lista.");return}
- try{
-  const h=readHistory();
-  const entry={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)),date:lastList.date,note:lastList.note||"",groups:JSON.parse(JSON.stringify(lastList.groups))};
-  h.unshift(entry);localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h.slice(0,50)));showHistory();
-  alert("Lista a fost salvată. O poți redeschide din secțiunea «Liste salvate».");
- }catch(e){console.error(e);alert("Nu am putut salva lista pe acest dispozitiv. Verifică spațiul disponibil și permisiunile Safari.")}
-}
-function openSavedList(index){
- const h=readHistory();
- const item=h[Number(index)];
- if(!item || !item.groups || typeof item.groups!=="object"){
-  alert("Lista salvată nu a putut fi găsită. Reîncarcă istoricul și încearcă din nou.");
-  showHistory(); return;
- }
- lastList={date:item.date||"Listă salvată",note:item.note||"",groups:item.groups};
- $("resultDate").textContent=lastList.date;
- $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
- $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${(Array.isArray(items)?items:[]).map(x=>`<div class="result-item">□ &nbsp;${esc(String(x))}</div>`).join("")}</div>`).join("");
- $("catalog").style.display="none";
- $("result").classList.add("show");
- document.querySelector(".sticky").style.display="none";
- window.scrollTo({top:0,behavior:"smooth"});
-}
-function deleteSavedList(index){
- if(!confirm("Ștergi această listă salvată?"))return;
- const h=readHistory();h.splice(index,1);
- try{localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h));showHistory()}catch(e){alert("Nu am putut actualiza istoricul.")}
-}
-function showHistory(){
- const h=readHistory();
- $("history").innerHTML=h.length?h.map((x,i)=>{
-  const count=Object.values(x.groups).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
-  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button type="button" class="secondary" data-history-action="open" data-history-index="${i}">Deschide</button><button type="button" class="plain" data-history-action="delete" data-history-index="${i}">Șterge</button></div></div>`
- }).join(""):"Nicio listă salvată încă.";
-}
-$("history").addEventListener("click",event=>{
- const button=event.target.closest("button[data-history-action]");
- if(!button)return;
- event.preventDefault();
- const index=Number(button.dataset.historyIndex);
- if(button.dataset.historyAction==="open")openSavedList(index);
- if(button.dataset.historyAction==="delete")deleteSavedList(index);
-});
-$("generateBtn").addEventListener("click",()=>window.generate());
-$("search").addEventListener("input",render);
-render();showHistory();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
-</body></html>
+const DB_KEY='lista-aprovizionare-db', HISTORY_KEY='lista-aprovizionare-history';
+const $=id=>document.getElementById(id); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function safeParse(raw,fallback){try{return JSON.parse(raw)??fallback}catch{return fallback}}
+function loadDB(){let d=safeParse(localStorage.getItem(DB_KEY),null);if(!d||typeof d!=='object')d={categories:DEFAULT_CATS,suppliers:[],products:[]};
+ d.categories=Array.isArray(d.categories)?d.categories.filter(x=>typeof x==='string'&&x.trim()):[...DEFAULT_CATS];d.suppliers=Array.isArray(d.suppliers)?d.suppliers.filter(x=>typeof x==='string'&&x.trim()):[];d.products=Array.isArray(d.products)?d.products.filter(p=>p&&typeof p==='object'&&typeof p.name==='string').map(p=>({...p,id:String(p.id??makeId()),name:p.name,category:String(p.category||d.categories[0]||'Alte produse'),supplier:p.supplier==='Comandă clasică'?'':String(p.supplier||'')})):[];
+ // Keep legacy catalog data intact; only normalize the retired supplier label in memory.
+ d.suppliers=d.suppliers.filter(s=>s!=='Comandă clasică');return d}
+let db=loadDB(),selected=new Set(),lastList=null,editingProductId=null,editingCategoryName=null,editingSupplierName=null;
+function makeId(){return (globalThis.crypto?.randomUUID?.()||('id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)))}
+function persist(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));return true}catch(e){console.error('Salvarea catalogului a eșuat',e);alert('Nu am putut salva datele local. Verifică spațiul disponibil în browser.');return false}}
+function readHistory(){const h=safeParse(localStorage.getItem(HISTORY_KEY),[]);return Array.isArray(h)?h.filter(x=>x&&x.groups&&typeof x.groups==='object'):[]}
+function saveHistorySnapshot(list){const h=readHistory();h.unshift({id:makeId(),date:list.date,isoDate:list.isoDate,note:list.note||'',groups:JSON.parse(JSON.stringify(list.groups))});try{localStorage.setItem(HISTORY_KEY,JSON.stringify(h));renderHistory();return true}catch(e){console.error(e);alert('Lista a fost generată, dar istoricul nu a putut fi salvat.');return false}}
+function updateCount(){const n=selected.size;$('selectedCount').textContent=n+' selectate';$('stickyCount').textContent=n+' produse'}
+function render(){const q=$('search').value.trim().toLocaleLowerCase('ro');$('categories').innerHTML='';$('jumpNav').innerHTML=db.categories.map((c,i)=>`<button class="secondary" type="button" data-jump="${i}">${esc(c)}</button>`).join('');
+ db.categories.forEach((cat,i)=>{const items=db.products.filter(p=>p.category===cat&&p.name.toLocaleLowerCase('ro').includes(q));const section=document.createElement('section');section.className='panel category';section.id='sec'+i;section.innerHTML=`<div class="row category-head" data-category-swipe="${esc(cat)}"><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span><span class="swipe-hint">Glisează pentru ștergere</span><button type="button" class="plain" style="padding:5px 8px" data-edit-category="${esc(cat)}" aria-label="Editează categoria ${esc(cat)}">•••</button></div>`+(items.length?items.map(p=>`<div class="product" data-product-swipe="${esc(p.id)}"><input aria-label="Selectează ${esc(p.name)}" type="checkbox" data-toggle-product="${esc(p.id)}" ${selected.has(p.id)?'checked':''}><span style="flex:1">${esc(p.name)}</span>${p.supplier?`<span class="small">${esc(p.supplier)}</span>`:''}<button type="button" class="plain" style="padding:5px 8px" data-edit-product="${esc(p.id)}" aria-label="Editează ${esc(p.name)}">•••</button></div>`).join(''):`<div class="empty">${q?'Niciun produs găsit.':'Nu există produse în această categorie.'}</div>`);$('categories').appendChild(section)});
+ $('supplierManager').innerHTML=db.suppliers.length?db.suppliers.map(s=>`<span class="supplier-chip">${esc(s)} <button class="plain" type="button" data-edit-supplier="${esc(s)}">Editează</button><button class="danger" type="button" data-delete-supplier="${esc(s)}">Șterge</button></span>`).join(''):'<div class="empty">Nu ai adăugat furnizori încă.</div>';updateCount()}
+function renderHistory(){const h=readHistory();$('history').innerHTML=h.length?h.map((x,i)=>{const count=Object.values(x.groups).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);return `<div class="history-item"><div><b>${esc(x.date||'Listă salvată')}</b><div class="small">${count} produse${x.note?' · '+esc(x.note):''}</div></div><div class="actions"><button class="secondary" data-history-open="${i}">Deschide</button><button class="plain" data-history-copy="${i}">Copiază</button><button class="danger" data-history-delete="${i}">Șterge</button></div></div>`}).join(''):'Nicio listă salvată încă.'}
+function openProduct(id=null){editingProductId=id;const p=id?db.products.find(x=>x.id===id):null;$('productModalTitle').textContent=p?'Editează produs':'Adaugă produs';$('deleteProductBtn').classList.toggle('hidden',!p);$('productName').value=p?.name||'';$('productCategory').innerHTML=db.categories.map(c=>`<option value="${esc(c)}" ${p?.category===c?'selected':''}>${esc(c)}</option>`).join('');$('productSupplier').innerHTML='<option value="">Fără furnizor</option>'+db.suppliers.map(s=>`<option value="${esc(s)}" ${p?.supplier===s?'selected':''}>${esc(s)}</option>`).join('');$('productModal').showModal();$('productName').focus()}
+function saveProduct(){const name=$('productName').value.trim(),category=$('productCategory').value,supplier=$('productSupplier').value;if(!name)return alert('Introdu denumirea produsului.');if(!category)return alert('Adaugă mai întâi o categorie.');if(editingProductId){const p=db.products.find(x=>x.id===editingProductId);if(p)Object.assign(p,{name,category,supplier})}else db.products.push({id:makeId(),name,category,supplier});if(persist()){$('productModal').close();render()}}
+function deleteProduct(id){const p=db.products.find(x=>x.id===id);if(!p||!confirm(`Ștergi produsul „${p.name}”?`))return;db.products=db.products.filter(x=>x.id!==id);selected.delete(id);persist();$('productModal').close();render()}
+function openCategory(name=null){editingCategoryName=name;$('categoryModalTitle').textContent=name?'Redenumește categoria':'Adaugă categorie';$('deleteCategoryBtn').classList.toggle('hidden',!name);$('categoryName').value=name||'';$('categoryModal').showModal();$('categoryName').focus()}
+function saveCategory(){const name=$('categoryName').value.trim();if(!name)return alert('Introdu denumirea categoriei.');if(editingCategoryName){if(db.categories.some(c=>c.toLocaleLowerCase('ro')===name.toLocaleLowerCase('ro')&&c!==editingCategoryName))return alert('Există deja o categorie cu acest nume.');db.categories=db.categories.map(c=>c===editingCategoryName?name:c);db.products.forEach(p=>{if(p.category===editingCategoryName)p.category=name})}else{if(db.categories.some(c=>c.toLocaleLowerCase('ro')===name.toLocaleLowerCase('ro')))return alert('Categoria există deja.');db.categories.push(name)}if(persist()){$('categoryModal').close();render()}}
+function deleteCategory(name){if(!db.categories.includes(name))return;const count=db.products.filter(p=>p.category===name).length;if(!confirm(count?`Ștergi categoria „${name}” și cele ${count} produse din ea? Această acțiune nu poate fi anulată.`:`Ștergi categoria „${name}”?`))return;const ids=db.products.filter(p=>p.category===name).map(p=>p.id);db.products=db.products.filter(p=>p.category!==name);ids.forEach(id=>selected.delete(id));db.categories=db.categories.filter(c=>c!==name);persist();render()}
+function openSupplier(name=null){editingSupplierName=name;$('supplierModalTitle').textContent=name?'Redenumește furnizorul':'Adaugă furnizor';$('supplierName').value=name||'';$('supplierModal').showModal();$('supplierName').focus()}
+function saveSupplier(){const name=$('supplierName').value.trim();if(!name)return alert('Introdu denumirea furnizorului.');if(db.suppliers.some(s=>s.toLocaleLowerCase('ro')===name.toLocaleLowerCase('ro')&&s!==editingSupplierName))return alert('Furnizorul există deja.');if(editingSupplierName){db.suppliers=db.suppliers.map(s=>s===editingSupplierName?name:s);db.products.forEach(p=>{if(p.supplier===editingSupplierName)p.supplier=name})}else db.suppliers.push(name);if(persist()){$('supplierModal').close();render()}}
+function deleteSupplier(name){if(!confirm(`Ștergi furnizorul „${name}”? Produsele asociate vor rămâne în catalog, fără furnizor.`))return;db.suppliers=db.suppliers.filter(s=>s!==name);db.products.forEach(p=>{if(p.supplier===name)p.supplier=''});persist();render()}
+function makeListText(list){return 'LISTĂ DE APROVIZIONARE\n'+(list.date||'')+'\n'+(list.note?'NOTĂ: '+list.note+'\n\n':'\n')+Object.entries(list.groups).map(([g,a])=>g+'\n'+a.map(x=>'• '+x).join('\n')).join('\n\n')}
+function displayList(list){lastList=list;$('historyPanel').classList.add('hidden');$('resultDate').textContent=list.date||'';$('resultNote').innerHTML=list.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTIȚĂ</div><div class="note">${esc(list.note)}</div>`:'';$('resultGroups').innerHTML=Object.entries(list.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${(Array.isArray(items)?items:[]).map(x=>`<div class="result-item">□ &nbsp;${esc(String(x))}</div>`).join('')}</div>`).join('');$('catalog').classList.add('hidden');$('result').classList.add('show');document.querySelector('.sticky').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function generate(){const chosen=db.products.filter(p=>selected.has(p.id));if(!chosen.length)return alert('Nu ai selectat niciun produs. Bifează produsele dorite și încearcă din nou.');const groups={};chosen.forEach(p=>{const group=p.supplier||p.category;(groups[group]??=[]).push(p.name)});const now=new Date();const list={date:now.toLocaleString('ro-RO'),isoDate:now.toISOString(),note:$('note').value.trim(),groups};displayList(list);saveHistorySnapshot(list)}
+function backToEdit(){$('historyPanel').classList.remove('hidden');$('catalog').classList.remove('hidden');$('result').classList.remove('show');document.querySelector('.sticky').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function startNewList(){$('historyPanel').classList.remove('hidden');selected.clear();lastList=null;$('note').value='';updateCount();render();$('catalog').classList.remove('hidden');$('result').classList.remove('show');document.querySelector('.sticky').classList.remove('hidden');$('search').value='';render();window.scrollTo({top:0,behavior:'smooth'})}
+async function copyText(text){try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text)}else{const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw Error('Clipboard indisponibil')}alert('Lista a fost copiată.')}catch(e){console.error(e);alert('Nu am putut copia automat. Folosește Distribuie sau Printează.')}}
+async function shareList(list=lastList){if(!list)return;const text=makeListText(list);if(navigator.share){try{await navigator.share({title:'Lista Aprovizionare',text})}catch(e){if(e.name!=='AbortError')console.error('Share failed',e)}}else copyText(text)}
+async function downloadPDF(){if(!lastList)return;const panel=$('result').querySelector('.panel');if(typeof window.html2pdf==='function'){try{const source=panel.cloneNode(true);source.querySelectorAll('.actions,.no-print').forEach(x=>x.remove());source.classList.add('pdf-export');source.style.width='720px';source.style.maxWidth='720px';source.style.margin='0';source.style.border='0';source.style.boxShadow='none';const holder=document.createElement('div');holder.style.cssText='position:fixed;left:-10000px;top:0;background:#fff;z-index:-1';holder.appendChild(source);document.body.appendChild(holder);await window.html2pdf().set({margin:[12,12,12,12],filename:'Lista-aprovizionare-'+new Date().toISOString().slice(0,10)+'.pdf',image:{type:'jpeg',quality:.96},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(source).save();holder.remove();return}catch(e){console.error('PDF library failed; falling back to print',e)}}alert('Generarea PDF directă nu este disponibilă acum. Se va deschide fereastra de imprimare; alege „Salvează ca PDF” dacă browserul oferă opțiunea.');window.print()}
+function openSavedList(index){const item=readHistory()[Number(index)];if(!item)return;displayList({date:item.date||'Listă salvată',isoDate:item.isoDate||'',note:item.note||'',groups:item.groups})}
+function deleteSavedList(index){if(!confirm('Ștergi această listă din istoric?'))return;const h=readHistory();h.splice(Number(index),1);localStorage.setItem(HISTORY_KEY,JSON.stringify(h));renderHistory()}
+// Delegated UI actions
+$('categories').addEventListener('change',e=>{const c=e.target.closest('[data-toggle-product]');if(!c)return;c.checked?selected.add(c.dataset.toggleProduct):selected.delete(c.dataset.toggleProduct);updateCount();const row=c.closest('.product');if(row){const head=row.closest('.category')?.querySelector('.category-head .count');if(head){const all=row.closest('.category').querySelectorAll('[data-toggle-product]');head.textContent=[...all].filter(x=>x.checked).length+' / '+all.length}}});
+$('categories').addEventListener('click',e=>{const p=e.target.closest('[data-edit-product]');if(p){openProduct(p.dataset.editProduct);return}const c=e.target.closest('[data-edit-category]');if(c){const name=c.dataset.editCategory;openCategory(name)}});
+$('jumpNav').addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(b)$('sec'+b.dataset.jump)?.scrollIntoView({behavior:'smooth',block:'start'})});
+$('supplierManager').addEventListener('click',e=>{const a=e.target.closest('[data-edit-supplier]'),d=e.target.closest('[data-delete-supplier]');if(a)openSupplier(a.dataset.editSupplier);if(d)deleteSupplier(d.dataset.deleteSupplier)});
+$('history').addEventListener('click',e=>{const o=e.target.closest('[data-history-open]'),c=e.target.closest('[data-history-copy]'),d=e.target.closest('[data-history-delete]');if(o)openSavedList(o.dataset.historyOpen);if(c){const x=readHistory()[Number(c.dataset.historyCopy)];if(x)copyText(makeListText(x))}if(d)deleteSavedList(d.dataset.historyDelete)});
+// Swipe only after a clear horizontal left movement; vertical scrolling and supplier headings are excluded.
+(function enableSwipeDelete(){let start=null;const root=$('categories');root.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const target=e.target.closest('[data-product-swipe],[data-category-swipe]');if(!target)return;start={target,x:e.clientX,y:e.clientY}},{passive:true});root.addEventListener('pointerup',e=>{if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y,target=start.target;start=null;if(dx<=-85&&Math.abs(dx)>Math.abs(dy)*1.5){if(target.dataset.productSwipe){const id=target.dataset.productSwipe,p=db.products.find(x=>x.id===id);if(p&&confirm(`Ștergi produsul „${p.name}”?`)){db.products=db.products.filter(x=>x.id!==id);selected.delete(id);persist();render()}}else if(target.dataset.categorySwipe)deleteCategory(target.dataset.categorySwipe)}},{passive:true});root.addEventListener('pointercancel',()=>{start=null},{passive:true})})();
+$('addProductBtn').onclick=()=>openProduct();$('addSupplierBtn').onclick=()=>openSupplier();$('addCategoryBtn').onclick=()=>openCategory();$('saveProductBtn').onclick=saveProduct;$('deleteProductBtn').onclick=()=>deleteProduct(editingProductId);$('cancelProductBtn').onclick=()=>$('productModal').close();$('saveCategoryBtn').onclick=saveCategory;$('deleteCategoryBtn').onclick=()=>{if(editingCategoryName){deleteCategory(editingCategoryName);$('categoryModal').close()}};$('cancelCategoryBtn').onclick=()=>$('categoryModal').close();$('saveSupplierBtn').onclick=saveSupplier;$('cancelSupplierBtn').onclick=()=>$('supplierModal').close();$('generateBtn').onclick=generate;$('newListBtn').onclick=startNewList;$('backBtn').onclick=backToEdit;$('pdfBtn').onclick=downloadPDF;$('shareBtn').onclick=()=>shareList();$('copyBtn').onclick=()=>lastList&&copyText(makeListText(lastList));$('printBtn').onclick=()=>window.print();$('historyRefresh').onclick=renderHistory;$('search').addEventListener('input',render);
+// Enter submits modal fields without requiring a keyboard-specific button tap.
+$('productName').addEventListener('keydown',e=>{if(e.key==='Enter')saveProduct()});$('categoryName').addEventListener('keydown',e=>{if(e.key==='Enter')saveCategory()});$('supplierName').addEventListener('keydown',e=>{if(e.key==='Enter')saveSupplier()});
+render();renderHistory();
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Service Worker indisponibil:',e)))}
+</script></body></html>
