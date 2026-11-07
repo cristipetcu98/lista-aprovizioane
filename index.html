@@ -145,21 +145,53 @@ window.generate = function(){
  $("catalog").style.display="none";$("result").classList.add("show");document.querySelector(".sticky").style.display="none";window.scrollTo({top:0,behavior:"smooth"});
  } catch(err) { console.error("Eroare la generarea listei:",err); alert("Nu am putut genera lista. Reîncarcă pagina și încearcă din nou."); }
 };
-async function downloadPDF(){
- if(!lastList){alert("Generează mai întâi lista.");return;}
- if(typeof html2pdf==="undefined"){alert("Modulul PDF nu s-a încărcat. Verifică conexiunea la internet și încearcă din nou.");return;}
+function makePdfSource(){
  const source=$("result").querySelector(".panel").cloneNode(true);
  source.querySelectorAll(".actions,.no-print").forEach(el=>el.remove());
  source.classList.add("pdf-export");
  source.style.width="720px";source.style.maxWidth="720px";source.style.margin="0";source.style.border="0";source.style.boxShadow="none";
- const holder=document.createElement("div");holder.style.position="fixed";holder.style.left="0";holder.style.top="0";holder.style.zIndex="-1000";holder.style.background="#fff";holder.appendChild(source);document.body.appendChild(holder);
- const safeDate=new Date().toISOString().slice(0,10);
- try{await html2pdf().set({margin:[12,12,12,12],filename:`Lista-aprovizionare-${safeDate}.pdf`,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(source).save();}
- catch(err){console.error(err);alert("Nu am reușit să creez PDF-ul. Încearcă din nou.");}
- finally{holder.remove();}
+ const holder=document.createElement("div");holder.style.position="fixed";holder.style.left="-10000px";holder.style.top="0";holder.style.zIndex="-1000";holder.style.background="#fff";holder.appendChild(source);document.body.appendChild(holder);
+ return {source,holder};
+}
+function pdfOptions(filename){return {margin:[12,12,12,12],filename,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}}
+async function createPdfBlob(){
+ if(!lastList)throw new Error("Nu există o listă generată.");
+ if(typeof html2pdf==="undefined")throw new Error("Modulul PDF nu s-a încărcat. Verifică conexiunea la internet.");
+ const {source,holder}=makePdfSource();
+ try{
+  const worker=html2pdf().set(pdfOptions("lista-aprovizionare.pdf")).from(source);
+  const blob=await worker.toPdf().outputPdf("blob").thenExternal(value=>value);
+  if(!(blob instanceof Blob)||blob.size===0)throw new Error("PDF-ul generat este gol.");
+  return blob;
+ }finally{holder.remove();}
+}
+async function downloadPDF(){
+ if(!lastList){alert("Generează mai întâi lista.");return;}
+ try{
+  const blob=await createPdfBlob();
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download=`Lista-aprovizionare-${new Date().toISOString().slice(0,10)}.pdf`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
+ }catch(err){console.error(err);alert(err.message||"Nu am reușit să creez PDF-ul. Încearcă din nou.");}
 }
 function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
-async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
+async function shareList(){
+ if(!lastList){alert("Generează mai întâi lista.");return;}
+ try{
+  const blob=await createPdfBlob();
+  const file=new File([blob],`Lista-aprovizionare-${new Date().toISOString().slice(0,10)}.pdf`,{type:"application/pdf"});
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+   await navigator.share({title:"Lista de aprovizionare",files:[file]});
+  }else{
+   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
+   alert("Telefonul sau browserul nu permite partajarea directă a fișierului PDF. PDF-ul a fost descărcat; îl poți atașa din Fișiere.");
+  }
+ }catch(err){
+  if(err && err.name==="AbortError")return;
+  console.error("Partajarea PDF a eșuat:",err);
+  alert(err.message||"Nu am putut pregăti PDF-ul pentru partajare. Încearcă din nou.");
+ }
+}
 function readHistory(){
  try{const value=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");return Array.isArray(value)?value.filter(x=>x&&x.groups&&typeof x.groups==="object"):[]}
  catch(e){console.error("Istoricul nu poate fi citit",e);return []}
@@ -174,12 +206,20 @@ function saveHistory(){
  }catch(e){console.error(e);alert("Nu am putut salva lista pe acest dispozitiv. Verifică spațiul disponibil și permisiunile Safari.")}
 }
 function openSavedList(index){
- const h=readHistory(),item=h[index];if(!item)return;
- lastList={date:item.date,note:item.note||"",groups:item.groups};
+ const h=readHistory();
+ const item=h[Number(index)];
+ if(!item || !item.groups || typeof item.groups!=="object"){
+  alert("Lista salvată nu a putut fi găsită. Reîncarcă istoricul și încearcă din nou.");
+  showHistory(); return;
+ }
+ lastList={date:item.date||"Listă salvată",note:item.note||"",groups:item.groups};
  $("resultDate").textContent=lastList.date;
  $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
- $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
- $("catalog").style.display="none";$("result").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});
+ $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${(Array.isArray(items)?items:[]).map(x=>`<div class="result-item">□ &nbsp;${esc(String(x))}</div>`).join("")}</div>`).join("");
+ $("catalog").style.display="none";
+ $("result").classList.add("show");
+ document.querySelector(".sticky").style.display="none";
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 function deleteSavedList(index){
  if(!confirm("Ștergi această listă salvată?"))return;
@@ -190,9 +230,20 @@ function showHistory(){
  const h=readHistory();
  $("history").innerHTML=h.length?h.map((x,i)=>{
   const count=Object.values(x.groups).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
-  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button class="secondary" onclick="openSavedList(${i})">Deschide</button><button class="plain" onclick="deleteSavedList(${i})">Șterge</button></div></div>`
+  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button type="button" class="secondary" data-history-action="open" data-history-index="${i}">Deschide</button><button type="button" class="plain" data-history-action="delete" data-history-index="${i}">Șterge</button></div></div>`
  }).join(""):"Nicio listă salvată încă.";
 }
-$("generateBtn").addEventListener("click",()=>window.generate());$("search").addEventListener("input",render);render();showHistory();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+$("history").addEventListener("click",event=>{
+ const button=event.target.closest("button[data-history-action]");
+ if(!button)return;
+ event.preventDefault();
+ const index=Number(button.dataset.historyIndex);
+ if(button.dataset.historyAction==="open")openSavedList(index);
+ if(button.dataset.historyAction==="delete")deleteSavedList(index);
+});
+$("generateBtn").addEventListener("click",()=>window.generate());
+$("search").addEventListener("input",render);
+render();showHistory();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body></html>
