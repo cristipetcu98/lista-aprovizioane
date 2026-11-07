@@ -70,6 +70,7 @@ dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow
    <button class="primary" onclick="downloadPDF()">Descarcă PDF</button>
    <button class="secondary" onclick="shareList()">Partajează</button>
    <button class="plain" onclick="backToEdit()">Înapoi la produse</button>
+   <button class="secondary" onclick="startNewList()">＋ Generează o nouă listă</button>
    <button class="plain" onclick="saveHistory()">Salvează în istoric</button>
   </div>
  </div>
@@ -115,8 +116,9 @@ function render(){
  all.forEach((cat,i)=>{
   let items=db.products.filter(p=>(db.categories.includes(cat)?p.category===cat:p.supplier===cat)&&p.name.toLocaleLowerCase("ro").includes(q));
   const section=document.createElement("section");section.className="panel category";section.id="sec"+i;
-  section.innerHTML=`<div class="row category-head" data-category-swipe="${db.categories.includes(cat)?esc(cat):''}"><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span>${db.categories.includes(cat)?'<span class="swipe-hint">Glisează pentru ștergere</span>':''}</div>`+
-   (items.length?items.map(p=>`<label class="product" data-product-swipe="${esc(p.id)}"><input type="checkbox" ${selected.has(p.id)?"checked":""} onchange="toggle('${p.id}',this.checked)"><span>${esc(p.name)}</span><button class="plain" style="margin-left:auto;padding:5px 8px" onclick="event.preventDefault();editProduct('${p.id}')">•••</button></label>`).join(""):`<div class="empty">${q?"Niciun produs găsit.":"Produsele vor fi adăugate aici când dictezi catalogul."}</div>`);
+  const isMainCategory=db.categories.includes(cat);
+  section.innerHTML=`<div class="row category-head" ${isMainCategory?`data-category-swipe="${esc(cat)}"`:''}><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span>${isMainCategory?'<span class="swipe-hint">Glisează pentru ștergere</span>':''}</div>`+
+   (items.length?items.map(p=>`<label class="product" data-product-swipe="${esc(p.id)}"><input type="checkbox" ${selected.has(p.id)?"checked":""} onchange="toggle('${p.id}',this.checked)"><span>${esc(p.name)}</span><button type="button" class="plain" style="margin-left:auto;padding:5px 8px" onclick="event.preventDefault();event.stopPropagation();editProduct('${p.id}')">•••</button></label>`).join(""):`<div class="empty">${q?"Niciun produs găsit.":"Produsele vor fi adăugate aici când dictezi catalogul."}</div>`);
   $("categories").appendChild(section);
  });
  updateCount();
@@ -127,7 +129,7 @@ function deleteProductById(id){
  db.products=db.products.filter(x=>x.id!==id);selected.delete(id);persist();render();
 }
 function deleteCategoryByName(name){
- if(!name)return;
+ if(!name||!db.categories.includes(name))return;
  const count=db.products.filter(p=>p.category===name).length;
  const message=count?`Ștergi categoria „${name}” și cele ${count} produse din ea? Această acțiune nu poate fi anulată.`:`Ștergi categoria „${name}”?`;
  if(!confirm(message))return;
@@ -135,7 +137,7 @@ function deleteCategoryByName(name){
  db.products=db.products.filter(p=>p.category!==name);removedIds.forEach(id=>selected.delete(id));
  db.categories=db.categories.filter(c=>c!==name);persist();render();
 }
-// Glisare spre stânga pe produs sau pe antetul unei categorii pentru ștergere.
+// Detectează doar glisări orizontale clare spre stânga; derularea verticală rămâne normală.
 (function enableSwipeDelete(){
  const root=$("categories");let start=null;
  root.addEventListener("pointerdown",event=>{
@@ -146,9 +148,8 @@ function deleteCategoryByName(name){
  },{passive:true});
  root.addEventListener("pointerup",event=>{
   if(!start)return;
-  const dx=event.clientX-start.x,dy=event.clientY-start.y;
-  const target=start.target;start=null;
-  if(dx < -75 && Math.abs(dx)>Math.abs(dy)*1.35){
+  const dx=event.clientX-start.x,dy=event.clientY-start.y,target=start.target;start=null;
+  if(dx<=-75&&Math.abs(dx)>Math.abs(dy)*1.35){
    if(target.dataset.productSwipe)deleteProductById(target.dataset.productSwipe);
    else if(target.dataset.categorySwipe)deleteCategoryByName(target.dataset.categorySwipe);
   }
@@ -194,6 +195,11 @@ async function downloadPDF(){
  finally{holder.remove();}
 }
 function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
+function startNewList(){
+ selected.clear();lastList=null;$("note").value="";updateCount();render();
+ $("catalog").style.display="block";$("result").classList.remove("show");
+ document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"});
+}
 async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
 function readHistory(){
  try{const value=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");return Array.isArray(value)?value.filter(x=>x&&x.groups&&typeof x.groups==="object"):[]}
@@ -209,12 +215,20 @@ function saveHistory(){
  }catch(e){console.error(e);alert("Nu am putut salva lista pe acest dispozitiv. Verifică spațiul disponibil și permisiunile Safari.")}
 }
 function openSavedList(index){
- const h=readHistory(),item=h[index];if(!item)return;
- lastList={date:item.date,note:item.note||"",groups:item.groups};
+ const h=readHistory();
+ const item=h[Number(index)];
+ if(!item || !item.groups || typeof item.groups!=="object"){
+  alert("Lista salvată nu a putut fi găsită. Reîncarcă istoricul și încearcă din nou.");
+  showHistory(); return;
+ }
+ lastList={date:item.date||"Listă salvată",note:item.note||"",groups:item.groups};
  $("resultDate").textContent=lastList.date;
  $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
- $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
- $("catalog").style.display="none";$("result").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});
+ $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${(Array.isArray(items)?items:[]).map(x=>`<div class="result-item">□ &nbsp;${esc(String(x))}</div>`).join("")}</div>`).join("");
+ $("catalog").style.display="none";
+ $("result").classList.add("show");
+ document.querySelector(".sticky").style.display="none";
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 function deleteSavedList(index){
  if(!confirm("Ștergi această listă salvată?"))return;
@@ -225,9 +239,20 @@ function showHistory(){
  const h=readHistory();
  $("history").innerHTML=h.length?h.map((x,i)=>{
   const count=Object.values(x.groups).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
-  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button class="secondary" onclick="openSavedList(${i})">Deschide</button><button class="plain" onclick="deleteSavedList(${i})">Șterge</button></div></div>`
+  return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button type="button" class="secondary" data-history-action="open" data-history-index="${i}">Deschide</button><button type="button" class="plain" data-history-action="delete" data-history-index="${i}">Șterge</button></div></div>`
  }).join(""):"Nicio listă salvată încă.";
 }
-$("generateBtn").addEventListener("click",()=>window.generate());$("search").addEventListener("input",render);render();showHistory();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+$("history").addEventListener("click",event=>{
+ const button=event.target.closest("button[data-history-action]");
+ if(!button)return;
+ event.preventDefault();
+ const index=Number(button.dataset.historyIndex);
+ if(button.dataset.historyAction==="open")openSavedList(index);
+ if(button.dataset.historyAction==="delete")deleteSavedList(index);
+});
+$("generateBtn").addEventListener("click",()=>window.generate());
+$("search").addEventListener("input",render);
+render();showHistory();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body></html>
