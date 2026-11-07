@@ -20,7 +20,8 @@ main{max-width:720px;margin:auto;padding:16px 16px 110px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}.section-title{font-size:17px;font-weight:720}.count{font-size:12px;color:var(--muted)}
 .search{width:100%;border:0;background:#f1f4f1;border-radius:12px;padding:13px 14px;font:inherit;outline:none;margin:12px 0}
 .category{margin-bottom:12px;scroll-margin-top:115px}.category h2{font-size:17px;margin:0 0 9px}
-.product{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid #eff2ef;font-size:15px}.product:first-of-type{border-top:0}
+.product{display:flex;align-items:center;gap:12px;padding:11px 2px;border-top:1px solid #eff2ef;font-size:15px;touch-action:pan-y;transition:background .15s}.product:first-of-type{border-top:0}
+.category-head{touch-action:pan-y;border-radius:9px;transition:background .15s}.swipe-hint{font-size:10px;color:#a33d31;font-weight:600;margin-left:auto;white-space:nowrap}.swipe-armed{background:#fff0ee!important}
 input[type=checkbox]{appearance:none;width:22px;height:22px;border:1.7px solid #bac7bd;border-radius:7px;margin:0;flex:0 0 22px;background:white}
 input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}input[type=checkbox]:checked:after{content:"✓";display:block;color:white;text-align:center;font-size:15px;font-weight:700;line-height:20px}
 button{font:inherit;border:0;border-radius:12px;padding:11px 14px;font-weight:650;cursor:pointer}
@@ -114,12 +115,46 @@ function render(){
  all.forEach((cat,i)=>{
   let items=db.products.filter(p=>(db.categories.includes(cat)?p.category===cat:p.supplier===cat)&&p.name.toLocaleLowerCase("ro").includes(q));
   const section=document.createElement("section");section.className="panel category";section.id="sec"+i;
-  section.innerHTML=`<div class="row"><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span></div>`+
-   (items.length?items.map(p=>`<label class="product"><input type="checkbox" ${selected.has(p.id)?"checked":""} onchange="toggle('${p.id}',this.checked)"><span>${esc(p.name)}</span><button class="plain" style="margin-left:auto;padding:5px 8px" onclick="event.preventDefault();editProduct('${p.id}')">•••</button></label>`).join(""):`<div class="empty">${q?"Niciun produs găsit.":"Produsele vor fi adăugate aici când dictezi catalogul."}</div>`);
+  section.innerHTML=`<div class="row category-head" data-category-swipe="${db.categories.includes(cat)?esc(cat):''}"><h2>${esc(cat)}</h2><span class="count">${items.filter(p=>selected.has(p.id)).length} / ${items.length}</span>${db.categories.includes(cat)?'<span class="swipe-hint">Glisează pentru ștergere</span>':''}</div>`+
+   (items.length?items.map(p=>`<label class="product" data-product-swipe="${esc(p.id)}"><input type="checkbox" ${selected.has(p.id)?"checked":""} onchange="toggle('${p.id}',this.checked)"><span>${esc(p.name)}</span><button class="plain" style="margin-left:auto;padding:5px 8px" onclick="event.preventDefault();editProduct('${p.id}')">•••</button></label>`).join(""):`<div class="empty">${q?"Niciun produs găsit.":"Produsele vor fi adăugate aici când dictezi catalogul."}</div>`);
   $("categories").appendChild(section);
  });
  updateCount();
 }
+function deleteProductById(id){
+ const p=db.products.find(x=>x.id===id);if(!p)return;
+ if(!confirm(`Ștergi produsul „${p.name}”?`))return;
+ db.products=db.products.filter(x=>x.id!==id);selected.delete(id);persist();render();
+}
+function deleteCategoryByName(name){
+ if(!name)return;
+ const count=db.products.filter(p=>p.category===name).length;
+ const message=count?`Ștergi categoria „${name}” și cele ${count} produse din ea? Această acțiune nu poate fi anulată.`:`Ștergi categoria „${name}”?`;
+ if(!confirm(message))return;
+ const removedIds=db.products.filter(p=>p.category===name).map(p=>p.id);
+ db.products=db.products.filter(p=>p.category!==name);removedIds.forEach(id=>selected.delete(id));
+ db.categories=db.categories.filter(c=>c!==name);persist();render();
+}
+// Glisare spre stânga pe produs sau pe antetul unei categorii pentru ștergere.
+(function enableSwipeDelete(){
+ const root=$("categories");let start=null;
+ root.addEventListener("pointerdown",event=>{
+  if(event.pointerType==="mouse")return;
+  const target=event.target.closest("[data-product-swipe], [data-category-swipe]");
+  if(!target)return;
+  start={target,x:event.clientX,y:event.clientY};
+ },{passive:true});
+ root.addEventListener("pointerup",event=>{
+  if(!start)return;
+  const dx=event.clientX-start.x,dy=event.clientY-start.y;
+  const target=start.target;start=null;
+  if(dx < -75 && Math.abs(dx)>Math.abs(dy)*1.35){
+   if(target.dataset.productSwipe)deleteProductById(target.dataset.productSwipe);
+   else if(target.dataset.categorySwipe)deleteCategoryByName(target.dataset.categorySwipe);
+  }
+ },{passive:true});
+ root.addEventListener("pointercancel",()=>{start=null;},{passive:true});
+})();
 function toggle(id,on){on?selected.add(id):selected.delete(id);updateCount()}
 function updateCount(){$("selectedCount").textContent=selected.size+" selectate";$("stickyCount").textContent=selected.size+" produse"}
 function openProduct(){
