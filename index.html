@@ -36,6 +36,7 @@ dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow
 #result{display:none}#result.show{display:block}.note{white-space:pre-wrap;background:#f1f5f1;border-radius:12px;padding:13px;font-size:14px}
 .result-group{margin:15px 0}.result-group h3{font-size:15px;color:var(--green);margin:0 0 7px}.result-item{padding:5px 0;font-size:14px}
 @media print{@page{size:auto;margin:14mm}body{background:white;color:#111}header,.no-print,.sticky{display:none!important}main{padding:0}.panel{border:0;box-shadow:none;padding:0}#catalog{display:none!important}#result{display:block!important}.note{border:1px solid #ddd;background:white}}
+.pdf-export{background:#fff;color:#17221a;padding:24px;width:720px;font-family:Arial,sans-serif}.pdf-export h2{font-size:22px;margin:0 0 8px}.pdf-export .result-group{break-inside:avoid;page-break-inside:avoid}.pdf-export .result-group h3{border-bottom:1px solid #dce6dd;padding-bottom:6px}.pdf-export .result-item{font-size:15px;padding:7px 0}
 </style>
 </head>
 <body>
@@ -65,7 +66,7 @@ dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow
   <div id="resultNote" style="margin-top:12px"></div>
   <div id="resultGroups"></div>
   <div class="actions no-print">
-   <button class="primary" onclick="printList()">Generează PDF / Imprimă</button>
+   <button class="primary" onclick="downloadPDF()">Descarcă PDF</button>
    <button class="secondary" onclick="shareList()">Partajează</button>
    <button class="plain" onclick="backToEdit()">Înapoi la produse</button>
    <button class="plain" onclick="saveHistory()">Salvează în istoric</button>
@@ -95,6 +96,7 @@ dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow
  <h2 class="modal-title">Adaugă categorie</h2><label>Denumire categorie</label><input id="categoryName" type="text" placeholder="Ex. Legume">
  <div class="actions"><button class="primary" onclick="addCategory()">Salvează</button><button class="plain" onclick="closeModal('categoryModal')">Anulează</button></div>
 </dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 const DEFAULT_CATS=["Legume","Fructe","Băcănie","Băuturi","Lactate","Dulciuri și snacksuri","Pâine și panificație","Ouă","Produse nealimentare","Alte produse"];
 let db=JSON.parse(localStorage.getItem("lista-aprovizionare-db")||"null")||{categories:DEFAULT_CATS,suppliers:[],products:[]};
@@ -141,7 +143,19 @@ function generate(){
  $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
  $("catalog").style.display="none";$("result").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});
 }
-function printList(){if(!lastList){alert("Generează mai întâi lista.");return;}window.print()}
+async function downloadPDF(){
+ if(!lastList){alert("Generează mai întâi lista.");return;}
+ if(typeof html2pdf==="undefined"){alert("Modulul PDF nu s-a încărcat. Verifică conexiunea la internet și încearcă din nou.");return;}
+ const source=$("result").querySelector(".panel").cloneNode(true);
+ source.querySelectorAll(".actions,.no-print").forEach(el=>el.remove());
+ source.classList.add("pdf-export");
+ source.style.width="720px";source.style.maxWidth="720px";source.style.margin="0";source.style.border="0";source.style.boxShadow="none";
+ const holder=document.createElement("div");holder.style.position="fixed";holder.style.left="0";holder.style.top="0";holder.style.zIndex="-1000";holder.style.background="#fff";holder.appendChild(source);document.body.appendChild(holder);
+ const safeDate=new Date().toISOString().slice(0,10);
+ try{await html2pdf().set({margin:[12,12,12,12],filename:`Lista-aprovizionare-${safeDate}.pdf`,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(source).save();}
+ catch(err){console.error(err);alert("Nu am reușit să creez PDF-ul. Încearcă din nou.");}
+ finally{holder.remove();}
+}
 function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");window.scrollTo({top:0,behavior:"smooth"})}
 async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
 function saveHistory(){if(!lastList)return;let h=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");h.unshift(lastList);localStorage.setItem("lista-aprovizionare-history",JSON.stringify(h.slice(0,50)));showHistory();alert("Lista a fost salvată în istoric.")}
