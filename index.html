@@ -78,7 +78,7 @@ dialog{border:0;border-radius:20px;padding:20px;width:min(92vw,480px);box-shadow
  <div id="history" class="small" style="margin-top:8px">Nicio listă salvată încă.</div>
 </section>
 </main>
-<div class="sticky no-print"><div class="sticky-inner"><div><b id="stickyCount">0 produse</b><div class="small">selectate</div></div><button class="primary" onclick="generate()">Generează lista →</button></div></div>
+<div class="sticky no-print"><div class="sticky-inner"><div><b id="stickyCount">0 produse</b><div class="small">selectate</div></div><button class="primary" id="generateBtn" type="button">Generează lista →</button></div></div>
 
 <dialog id="productModal">
  <h2 class="modal-title">Adaugă produs</h2>
@@ -134,15 +134,17 @@ function addSupplier(){let s=$("supplierName").value.trim();if(!s)return;if(!db.
 function openCategory(){$("categoryModal").showModal()}
 function addCategory(){let c=$("categoryName").value.trim();if(!c)return;if(!db.categories.includes(c))db.categories.push(c);$("categoryName").value="";persist();closeModal("categoryModal");render()}
 function closeModal(id){$(id).close()}
-function generate(){
- let chosen=db.products.filter(p=>selected.has(p.id));if(!chosen.length)return alert("Bifează cel puțin un produs.");
+window.generate = function(){
+ try {
+ let chosen=db.products.filter(p=>selected.has(p.id));if(!chosen.length){alert("Nu ai selectat niciun produs. Bifează produsele dorite și apasă din nou «Generează lista».");return;}
  lastList={date:new Date().toLocaleString("ro-RO"),note:$("note").value.trim(),groups:{}};
  chosen.forEach(p=>{const destination=p.supplier||p.category;(lastList.groups[destination]??=[]).push(p.name)});
  $("resultDate").textContent=lastList.date;
  $("resultNote").innerHTML=lastList.note?`<div class="small" style="font-weight:700;margin-bottom:6px">NOTĂ DE INFORMARE</div><div class="note">${esc(lastList.note)}</div>`:"";
  $("resultGroups").innerHTML=Object.entries(lastList.groups).map(([g,items])=>`<div class="result-group"><h3>${esc(g)}</h3>${items.map(x=>`<div class="result-item">□ &nbsp;${esc(x)}</div>`).join("")}</div>`).join("");
- $("catalog").style.display="none";$("result").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});
-}
+ $("catalog").style.display="none";$("result").classList.add("show");document.querySelector(".sticky").style.display="none";window.scrollTo({top:0,behavior:"smooth"});
+ } catch(err) { console.error("Eroare la generarea listei:",err); alert("Nu am putut genera lista. Reîncarcă pagina și încearcă din nou."); }
+};
 async function downloadPDF(){
  if(!lastList){alert("Generează mai întâi lista.");return;}
  if(typeof html2pdf==="undefined"){alert("Modulul PDF nu s-a încărcat. Verifică conexiunea la internet și încearcă din nou.");return;}
@@ -156,7 +158,7 @@ async function downloadPDF(){
  catch(err){console.error(err);alert("Nu am reușit să creez PDF-ul. Încearcă din nou.");}
  finally{holder.remove();}
 }
-function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");window.scrollTo({top:0,behavior:"smooth"})}
+function backToEdit(){$("catalog").style.display="block";$("result").classList.remove("show");document.querySelector(".sticky").style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
 async function shareList(){if(!lastList)return;let text="LISTĂ DE APROVIZIONARE\n"+(lastList.note?"NOTĂ: "+lastList.note+"\n\n":"")+Object.entries(lastList.groups).map(([g,a])=>g+"\n"+a.map(x=>"• "+x).join("\n")).join("\n\n");if(navigator.share){try{await navigator.share({title:"Lista Aprovizionare",text})}catch(e){}}else{await navigator.clipboard.writeText(text);alert("Lista a fost copiată.")}}
 function readHistory(){
  try{const value=JSON.parse(localStorage.getItem("lista-aprovizionare-history")||"[]");return Array.isArray(value)?value.filter(x=>x&&x.groups&&typeof x.groups==="object"):[]}
@@ -191,6 +193,6 @@ function showHistory(){
   return `<div style="padding:12px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${esc(x.date||"Listă salvată")}</b><div class="small">${count} produse</div></div><div class="actions" style="margin:0"><button class="secondary" onclick="openSavedList(${i})">Deschide</button><button class="plain" onclick="deleteSavedList(${i})">Șterge</button></div></div>`
  }).join(""):"Nicio listă salvată încă.";
 }
-$("search").addEventListener("input",render);render();showHistory();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+$("generateBtn").addEventListener("click",()=>window.generate());$("search").addEventListener("input",render);render();showHistory();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body></html>
