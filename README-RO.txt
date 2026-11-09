@@ -42,3 +42,7 @@ LIMITĂRI DE COMPATIBILITATE
 - Exportul Excel este CSV cu separator și codare compatibile cu Excel; nu este un fișier .xlsx nativ.
 - Generarea PDF folosește o bibliotecă externă atunci când există conexiune. Fără aceasta, aplicația oferă imprimare/Salvare ca PDF din browser.
 - Funcțiile de catalog, selecție, istoric și export CSV sunt locale. Sincronizarea cloud și integrarea cu casa de marcat nu sunt incluse.
+
+
+VERSIUNEA V2.3 – EXPORT PDF
+Butonul PDF folosește fereastra nativă de imprimare Safari, cu o pagină separată pentru tipărire. Pe iPhone: apasă PDF, în previzualizarea de imprimare mărește previzualizarea cu două degete, apoi folosește Partajare > Salvează în Fișiere pentru a salva PDF-ul. Cache-ul Service Worker a fost actualizat la v4.
