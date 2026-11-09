@@ -31,3 +31,12 @@ JavaScript trebuie verificat cu node --check. Testele de browser pot valida cău
 
 PUBLICARE
 Înlocuiește fișierele la rădăcina aceluiași repository GitHub Pages. Nu șterge datele Safari și nu schimba domeniul/calea aplicației. După actualizare, verifică produsele, furnizorii, istoricul și creează un Backup JSON nou.
+
+
+ACTUALIZARE V4.1 – FINALIZARE ȘI DOCUMENTE
+- Finalizarea salvează comanda în istoric înainte de deschiderea documentului.
+- Se deschide o pagină de listă optimizată A4, apoi dialogul nativ de imprimare al browserului.
+- Pe iPhone, folosește Partajare/Salvare din interfața de imprimare pentru a obține PDF-ul. Browserul nu permite aplicației web să scrie direct un fișier PDF local fără o bibliotecă PDF dedicată.
+- Dacă Safari blochează fereastra nouă, folosește butonul „Deschide PDF-ul / Imprimă” din aplicație.
+- După finalizare apare „Comandă nouă”; istoricul comenzii finalizate rămâne intact.
+- Documentul include denumire, categorie și grupare după furnizor.
