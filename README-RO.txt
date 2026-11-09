@@ -46,3 +46,13 @@ LIMITĂRI DE COMPATIBILITATE
 
 VERSIUNEA V2.3 – EXPORT PDF
 Butonul PDF folosește fereastra nativă de imprimare Safari, cu o pagină separată pentru tipărire. Pe iPhone: apasă PDF, în previzualizarea de imprimare mărește previzualizarea cu două degete, apoi folosește Partajare > Salvează în Fișiere pentru a salva PDF-ul. Cache-ul Service Worker a fost actualizat la v4.
+
+
+VERSIUNEA V2.5 – VERIFICARE RAPIDA
+A fost adăugat modul „Începe verificarea rafturilor”. Produsele sunt parcurse pe rând, grupate după categoriile existente. Pentru fiecare produs se poate marca AVEM, COMANDĂ sau MAI TÂRZIU. Starea verificării se salvează separat în localStorage, fără modificarea catalogului, istoricului, cheilor existente sau funcției PDF. Produsele marcate COMANDĂ intră în selecția normală a comenzii. Categoriile sunt folosite momentan ca zone de verificare; ordinea lor trebuie adaptată ulterior la traseul fizic real al magazinului.
+
+
+VERSIUNEA V3 – VERIFICARE PE CATEGORII
+Verificarea se face acum prin alegerea unei categorii și afișarea simultană a produselor acesteia. Fiecare produs poate fi marcat AVEM, STOC MIC sau LIPSEȘTE. Pentru ultimele două stări se poate introduce cantitatea. Produsele intră în selecția de aprovizionare fără duplicate, păstrând furnizorul. Progresul este salvat separat în localStorage.
+
+PDF: mecanismul nativ de imprimare Safari din versiunea anterioară a fost păstrat; lista include cantitatea și starea pentru produsele care au fost verificate. Compatibilitatea reală cu Safari pe iPhone trebuie confirmată pe dispozitiv. Testele automate de aici nu pot garanta comportamentul ferestrei native de imprimare iOS.
