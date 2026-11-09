@@ -68,17 +68,41 @@ function orderSnapshot(){
   names:products.map(p=>p.name),method:'manual'};
 }
 function printableHtml(order){
- const groups=order.groups||{};let entries=Object.entries(groups).map(([supplier,items])=>[supplier,(items||[]).map(item=>{
-  if(typeof item==='object'&&item)return {name:item.name||'',category:item.category||''};
-  const detail=(order.items||[]).find(x=>norm(x.name)===norm(item))||db.products.find(x=>norm(x.name)===norm(item));
-  return {name:String(item??''),category:detail?.category||'Categorie nespecificată'};
- })]);
- entries.sort((a,b)=>collator.compare(a[0],b[0]));
- const total=entries.reduce((n,[,items])=>n+items.length,0);
- const body=entries.map(([supplier,items])=>`<section><h2>${esc(supplier)} <small>(${items.length} produse)</small></h2><table><thead><tr><th class="check"></th><th>Produs</th><th>Categorie</th></tr></thead><tbody>${items.sort((a,b)=>collator.compare(a.name,b.name)).map(x=>`<tr><td class="check">□</td><td>${esc(x.name)}</td><td>${esc(x.category)}</td></tr>`).join('')}</tbody></table></section>`).join('');
- return `<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mati Market – Comandă</title><style>
- @page{size:A4 portrait;margin:13mm}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#17231c;margin:0;font-size:10pt;line-height:1.35}h1{font-size:19pt;color:#173f31;margin:0 0 4mm} .meta{color:#56645a;font-size:9pt;margin-bottom:7mm}h2{font-size:11pt;color:#28734d;border-bottom:1px solid #cbd8ce;padding:0 0 2mm;margin:6mm 0 2mm;break-after:avoid;page-break-after:avoid}h2 small{font-weight:400;color:#66736a}table{width:100%;border-collapse:collapse;table-layout:fixed}tr{break-inside:avoid;page-break-inside:avoid}td,th{text-align:left;padding:2.2mm 1.5mm;border-bottom:1px solid #e7ece8;vertical-align:top;overflow-wrap:anywhere;word-break:normal}th{font-size:8.5pt;color:#59665d}td{font-size:9.5pt}.check{width:9mm;text-align:center;font-size:13pt}.signature{margin-top:14mm;break-inside:avoid}.toolbar{position:sticky;top:0;background:#f1f5f2;padding:10px;margin:-0 0 12px;display:flex;gap:8px}.toolbar button{border:0;border-radius:8px;padding:10px 14px;background:#173f31;color:white;font-weight:700}@media print{.toolbar{display:none}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
- </style></head><body><div class="toolbar"><button onclick="window.print()">Tipărește / Salvează ca PDF</button><button onclick="window.close()">Închide</button></div><h1>MATI MARKET – LISTĂ DE APROVIZIONARE</h1><div class="meta">Generată: ${esc(order.date||new Date().toLocaleString('ro-RO'))} · ${total} produse · ${entries.length} furnizori</div>${body}<div class="signature">Verificat de: ____________________________ &nbsp;&nbsp; Semnătura: ____________________________</div><script>window.addEventListener('load',()=>setTimeout(()=>{try{window.focus();window.print()}catch(e){}},350));<\/script></body></html>`;
+ const names=(order.names&&order.names.length?order.names:Object.values(order.groups||{}).flat().map(item=>typeof item==='string'?item:item?.name)).filter(Boolean);
+ const unique=[...new Set(names.map(x=>String(x||'').trim()).filter(Boolean))].sort(collator.compare);
+ const dateText=order.date||new Date(order.timestamp||Date.now()).toLocaleDateString('ro-RO');
+ const items=unique.map((name,index)=>{
+  const length=name.length;
+  const fontSize=length>62?'8pt':length>48?'9pt':'10.5pt';
+  return `<div class="product"><span class="number">${index+1}.</span><span class="name" style="font-size:${fontSize}" title="${esc(name)}">${esc(name)}</span></div>`;
+ }).join('');
+ return `<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Listă de aprovizionare</title><style>
+ @page{size:A4 portrait;margin:8mm}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0;background:#fff;color:#17231c}
+ body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;font-size:10.5pt;line-height:1.1}
+ .toolbar{position:sticky;top:0;background:#f1f5f2;padding:10px;margin:0 0 8mm;display:flex;gap:8px}
+ .toolbar button{border:0;border-radius:8px;padding:10px 14px;background:#173f31;color:white;font-weight:700;font-size:14px}
+ header{border-bottom:2px solid #173f31;padding-bottom:2.5mm;margin-bottom:3mm}
+ h1{font-size:19pt;line-height:1.05;letter-spacing:.1px;color:#173f31;margin:0 0 2mm;font-weight:800}
+ .date{font-size:10pt;color:#39483f}
+ .products{display:block;width:100%}
+ .product{display:flex;align-items:center;gap:2mm;height:4.7mm;min-height:4.7mm;padding:0;border-bottom:1px solid #e6ece7;break-inside:avoid;page-break-inside:avoid;white-space:nowrap;overflow:hidden}
+ .number{flex:0 0 9mm;font-size:10pt;font-weight:800;color:#28734d;font-variant-numeric:tabular-nums}
+ .name{display:block;min-width:0;flex:1;font-weight:700;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .empty{font-size:11pt;color:#66736a}
+ @media print{
+  .toolbar{display:none}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .products{break-inside:auto}
+  .product{break-inside:avoid;page-break-inside:avoid}
+ }
+ @media screen{body{max-width:190mm;margin:12mm auto;padding:0 8mm}.toolbar{margin-bottom:6mm}}
+ </style></head><body>
+ <div class="toolbar"><button onclick="window.print()">Tipărește / Salvează PDF</button><button onclick="window.close()">Închide</button></div>
+ <header><h1>LISTĂ DE APROVIZIONARE</h1><div class="date">Data emiterii: ${esc(dateText)}</div></header>
+ <main class="products">${unique.length?items:'<div class="empty">Lista nu conține produse.</div>'}</main>
+ <script>window.addEventListener('load',()=>setTimeout(()=>{try{window.focus();window.print()}catch(e){}},350));<\/script></body></html>`;
 }
 function openPrintableOrder(order,existingWindow=null){
  let w=existingWindow;try{if(!w||w.closed)w=window.open('about:blank','_blank')}catch(e){w=null}
