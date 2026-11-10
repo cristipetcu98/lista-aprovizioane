@@ -1,42 +1,74 @@
-MATI MARKET – SMART RETAIL V4
-============================
+MATI MARKET – SMART RETAIL V4.8
+================================
 
-CONCEPT
-Aplicație PWA pentru aprovizionare rapidă: cauți produsul, îl adaugi o singură dată, iar lista se grupează automat după furnizor. Nu există cantități în comanda standard.
+NOUTATI V4.8
+------------
+- Buton separat „PRODUSE COMANDATE RECENT” in fila COMANDA.
+- Lista foloseste comenzile finalizate din istoric, inclusiv comenzile vechi care nu au toate campurile noi.
+- Produsele sunt unice si ordonate dupa cea mai recenta comanda.
+- Fiecare produs poate fi adaugat direct in comanda curenta; duplicatele sunt blocate.
+- Eliminata categoria defectuoasa „COMANDATE RECURENT” din catalog.
+- PDF REAL generat local in format A4, nu pagina HTML de imprimare.
+- Pe dispozitivele compatibile, PDF-ul poate fi trimis prin meniul nativ de partajare iOS; din acel meniu se poate alege Print sau Save to Files.
+- Daca partajarea fisierelor nu este disponibila, aplicatia afiseaza un link pentru deschiderea/descarcarea PDF-ului.
+- Produsele, categoriile si furnizorii existenti sunt standardizati cu LITERE MARI si FARA DIACRITICE.
+- La normalizare, duplicatele identice dupa denumire + categorie + furnizor sunt consolidate, iar referintele din comanda curenta si istoric sunt remapate.
+- Cache-ul Service Worker a fost actualizat.
 
-FIȘIERE
-- index.html – aplicația completă
-- sw.js – cache și funcționare offline
-- manifest.webmanifest – instalare PWA
-- icon-192.png / icon-512.png – pictograme
+FISIERE
+-------
+- index.html
+- sw.js
+- manifest.webmanifest
+- icon-192.png
+- icon-512.png
+- README-RO.txt
 
-MIGRARE V2/V3
-Aplicația folosește aceleași chei de stocare ca versiunea veche:
+DATE SI COMPATIBILITATE
+-----------------------
+Cheile localStorage existente sunt pastrate:
 - lista-aprovizionare-db
 - lista-aprovizionare-history
 - lista-aprovizionare-draft-v2
 
-Migrarea automată citește catalogul și istoricul vechi de pe aceeași origine și nu șterge cheile vechi. Important: GitHub Pages trebuie să rămână la exact aceeași adresă (domeniu și cale) pentru ca Safari să ofere acces la localStorage-ul vechi. Înainte de actualizare, recomandă-se un Backup JSON din aplicația veche.
+Nu schimba adresa GitHub Pages (domeniu si cale). Nu sterge datele Safari.
+Inainte de actualizare, este recomandat sa faci un Backup JSON din Setari.
+Datele raman locale dispozitivului; aceasta versiune nu adauga sincronizare intre dispozitive.
 
-VOCE
-Dacă browserul oferă SpeechRecognition/webkitSpeechRecognition, butonul microfon pornește recunoașterea în română. Textul este potrivit cu catalogul local și utilizatorul confirmă rezultatele înainte de adăugare. Dacă API-ul nu există, butonul mută cursorul în căutare, unde poate fi folosit microfonul tastaturii iOS.
+PDF PE IPHONE
+-------------
+Butonul „Distribuie PDF / Imprima” genereaza un fisier PDF real si incearca sa il trimita prin Web Share API, daca browserul permite partajarea fisierelor.
+In foaia de partajare iOS, alege Print pentru imprimare sau Save to Files pentru salvare.
+Daca iOS/browserul nu permite partajarea fisierelor, apare linkul „Descarca / Deschide PDF”.
+Comportamentul exact al foii de partajare si al imprimantei trebuie verificat pe iPhone-ul real. Testele locale nu pot certifica dialogurile native iOS.
 
-Limită importantă: această versiune include recunoaștere vocală disponibilă nativ în browser și identificare locală, nu un model AI cloud conversațional. Safari iOS poate să nu ofere Web Speech API. Pentru AI cloud real este necesar un backend securizat și un serviciu de transcriere/înțelegere, cu chei și costuri configurate separat.
+FORMAT PDF
+----------
+- A4 portret.
+- Titlu si data/ora emiterii.
+- Produse grupate pe furnizori.
+- Numerotare continua.
+- Produsele sunt afisate pe un singur rand.
+- Furnizorii neasociati sunt grupati separat.
+- 50 de produse de test in 5 grupe de furnizori au incaput pe o pagina A4.
+- Un test cu 130 de produse a generat 3 pagini A4.
 
-PDF
-Exportul folosește fereastra nativă de imprimare a browserului și CSS A4. Nu este posibilă certificarea comportamentului pe iPhone Safari din testele locale; trebuie verificat pe dispozitiv. Pe iPhone, în previzualizarea de imprimare, folosește Partajare pentru a salva PDF în Fișiere.
-
-TESTE ȘI LIMITĂRI
-JavaScript trebuie verificat cu node --check. Testele de browser pot valida căutarea, stocarea și fluxul local, dar nu pot garanta permisiunile microfonului, recunoașterea vocală sau dialogul nativ de imprimare pe iPhone fără test fizic. Datele sunt locale dispozitivului și nu se sincronizează automat între telefoane.
+TESTE EFECTUATE
+---------------
+- Sintaxa JavaScript: verificata cu node --check.
+- ID-uri HTML duplicate: niciunul identificat.
+- ID-uri necesare pentru functiile noi: prezente.
+- Cheile localStorage cerute: pastrate.
+- Implementarea veche bazata pe window.open()/window.print(): eliminata din fluxul PDF.
+- PDF valid, deschis si verificat cu instrumente PDF locale.
+- Test PDF 50 produse: 1 pagina A4.
+- Test PDF 130 produse: 3 pagini A4.
+- Logica produselor recente: verificata cu set de date de test.
+- Nu a fost disponibil un iPhone fizic pentru testarea finala a meniului nativ Share/Print.
 
 PUBLICARE
-Înlocuiește fișierele la rădăcina aceluiași repository GitHub Pages. Nu șterge datele Safari și nu schimba domeniul/calea aplicației. După actualizare, verifică produsele, furnizorii, istoricul și creează un Backup JSON nou.
-
-
-ACTUALIZARE V4.1 – FINALIZARE ȘI DOCUMENTE
-- Finalizarea salvează comanda în istoric înainte de deschiderea documentului.
-- Se deschide o pagină de listă optimizată A4, apoi dialogul nativ de imprimare al browserului.
-- Pe iPhone, folosește Partajare/Salvare din interfața de imprimare pentru a obține PDF-ul. Browserul nu permite aplicației web să scrie direct un fișier PDF local fără o bibliotecă PDF dedicată.
-- Dacă Safari blochează fereastra nouă, folosește butonul „Deschide PDF-ul / Imprimă” din aplicație.
-- După finalizare apare „Comandă nouă”; istoricul comenzii finalizate rămâne intact.
-- Documentul include denumire, categorie și grupare după furnizor.
+---------
+Inlocuieste cele 6 fisiere in radacina aceluiasi repository GitHub Pages.
+Pastreaza aceeasi adresa a aplicatiei.
+Dupa publicare, inchide complet aplicatia instalata si redeschide-o pentru a prelua noul Service Worker.
+Nu sterge datele Safari.
