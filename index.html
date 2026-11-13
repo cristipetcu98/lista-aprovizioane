@@ -245,43 +245,41 @@ function buildPdf(order){
   if(y<58)continuePage();
   commands.push('0.92 0.95 0.93 rg 34 '+(y-4)+' 527 15 re f');addText('F2',9,39,y,supplier,'0.09 0.25 0.19');y-=15;
   items.forEach(item=>{
-   if(y<(item.quantity?48:40))continuePage(supplier);
+   if(y<35)continuePage(supplier);
    num++;addText('F2',8.5,39,y,String(num)+'.','0.16 0.45 0.30');
-   let quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
-   if(quantityText.length>38)quantityText=quantityText.slice(0,35)+'...';
-   const badgeWidth=quantityText?quantityText.length*4.9+12:0;
-   const fullWidth=499;
-   const charWidth=5.05;
-   const maxLineChars=Math.max(20,Math.floor(fullWidth/charWidth));
-   const nameWords=String(item.name||'').split(/\\s+/).filter(Boolean);
-   const nameLines=[];let nameLine='';
-   nameWords.forEach(word=>{
-    const candidate=nameLine?nameLine+' '+word:word;
-    if(candidate.length>maxLineChars&&nameLine){nameLines.push(nameLine);nameLine=word;}
-    else nameLine=candidate;
+   const quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
+   const fontSize=9.2, charWidth=4.65, left=62, right=556, available=right-left;
+   const badgeWidth=quantityText?quantityText.length*4.35+10:0;
+   const maxChars=Math.floor(available/charWidth);
+   const words=String(item.name||'').trim().split(/\s+/).filter(Boolean);
+   const lines=[];let current='';
+   words.forEach(word=>{
+    const candidate=current?current+' '+word:word;
+    if(candidate.length>maxChars&&current){lines.push(current);current=word;}
+    else current=candidate;
    });
-   if(nameLine)nameLines.push(nameLine);
-   const lastLine=nameLines[nameLines.length-1]||'';
-   const badgeOnLastLine=quantityText&&(lastLine.length*charWidth+9+badgeWidth<=fullWidth);
-   const extraBadgeLine=quantityText&&!badgeOnLastLine;
-   const rowHeight=nameLines.length*12+(extraBadgeLine?14:0)+6;
-   if(y-rowHeight<42)continuePage(supplier);
-   nameLines.forEach((line,lineIndex)=>{
-    addText('F2',9.5,62,y,line,'0.09 0.12 0.10');
-    if(badgeOnLastLine&&lineIndex===nameLines.length-1){
-     const quantityX=62+line.length*charWidth+9;
-     commands.push('0.88 0.94 0.90 rg '+(quantityX-5)+' '+(y-5)+' '+badgeWidth+' 17 re f');
-     addText('F2',9.4,quantityX,y,quantityText,'0.05 0.28 0.17');
+   if(current)lines.push(current);
+   let last=lines[lines.length-1]||'';
+   const badgeFits=quantityText && (last.length*charWidth+12+badgeWidth<=available);
+   const separateBadge=quantityText&&!badgeFits;
+   const requiredHeight=lines.length*10.5+(separateBadge?10.5:0)+2;
+   if(y-requiredHeight<34)continuePage(supplier);
+   lines.forEach((line,i)=>{
+    addText('F2',fontSize,left,y,line,'0.09 0.12 0.10');
+    if(badgeFits&&i===lines.length-1){
+     const qx=left+line.length*charWidth+12;
+     commands.push('0.88 0.94 0.90 rg '+(qx-4)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
+     addText('F2',8.8,qx,y-0.2,quantityText,'0.05 0.28 0.17');
     }
-    y-=12;
+    y-=10.5;
    });
-   if(extraBadgeLine){
-    const quantityX=62;
-    commands.push('0.88 0.94 0.90 rg '+(quantityX-5)+' '+(y-5)+' '+badgeWidth+' 17 re f');
-    addText('F2',9.4,quantityX,y,quantityText,'0.05 0.28 0.17');
-    y-=14;
+   if(separateBadge){
+    commands.push('0.88 0.94 0.90 rg '+(left-4)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
+    addText('F2',8.8,left,y-0.2,quantityText,'0.05 0.28 0.17');
+    y-=10.5;
    }
-   commands.push('0.88 0.91 0.89 RG 0.35 w 39 '+(y-8)+' m 561 '+(y-8)+' l S');y-=18;
+   commands.push('0.88 0.91 0.89 RG 0.25 w 39 '+(y-1.5)+' m 561 '+(y-1.5)+' l S');
+   y-=2.5;
   });
   y-=3;
  });
@@ -293,9 +291,9 @@ function buildPdf(order){
  const footerHeight=24+quoteLines.length*12+42;
  if(y<footerHeight+28)continuePage();
  commands.push('0.82 0.87 0.83 RG 0.7 w 39 '+(y-5)+' m 556 '+(y-5)+' l S');
- y-=23;
- quoteLines.forEach(line=>{addText('F3',8.7,48,y,line,'0.25 0.31 0.27');y-=12;});
- y-=8;
+ y-=16;
+ quoteLines.forEach(line=>{addText('F3',8.2,48,y,line,'0.25 0.31 0.27');y-=10;});
+ y-=5;
  pages.push(commands.join('\n'));
  const objects=[];const add=o=>(objects.push(o),objects.length);const catalogId=add('');const pagesId=add('');const font1=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');const font2=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');const font3=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>');const pageIds=[];
  pages.forEach(content=>{const stream=content+'\n';const streamId=add(`<< /Length ${new TextEncoder().encode(stream).length} >>\nstream\n${stream}endstream`);const pageId=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 ${font1} 0 R /F2 ${font2} 0 R /F3 ${font3} 0 R >> >> /Contents ${streamId} 0 R >>`);pageIds.push(pageId)});
