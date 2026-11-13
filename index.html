@@ -250,13 +250,13 @@ function buildPdf(order){
    let quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
    if(quantityText.length>38)quantityText=quantityText.slice(0,35)+'...';
    const quantityWidth=quantityText?quantityText.length*5.5+10:0;
-   const quantityX=556-quantityWidth;
-   const maxName=Math.max(18,Math.floor((quantityX-75)/5.4));
+   const maxName=quantityText?Math.max(12,Math.floor((556-62-quantityWidth-18)/5.4)):Math.floor((556-62)/5.4);
    const shown=item.name.length>maxName?item.name.slice(0,maxName-1)+'...':item.name;
    addText('F2',9.5,62,y,shown,'0.09 0.12 0.10');
    if(quantityText){
+    const quantityX=62+shown.length*5.4+9;
     const pillX=quantityX-5;
-    commands.push('0.88 0.94 0.90 rg '+pillX+' '+(y-5)+' '+(561-pillX)+' 17 re f');
+    commands.push('0.88 0.94 0.90 rg '+pillX+' '+(y-5)+' '+(quantityWidth)+' 17 re f');
     addText('F2',9.4,quantityX,y,quantityText,'0.05 0.28 0.17');
    }
    commands.push('0.88 0.91 0.89 RG 0.35 w 39 '+(y-8)+' m 561 '+(y-8)+' l S');y-=18;
