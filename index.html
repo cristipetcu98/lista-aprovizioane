@@ -245,41 +245,60 @@ function buildPdf(order){
   if(y<58)continuePage();
   commands.push('0.92 0.95 0.93 rg 34 '+(y-4)+' 527 15 re f');addText('F2',9,39,y,supplier,'0.09 0.25 0.19');y-=15;
   items.forEach(item=>{
-   if(y<35)continuePage(supplier);
-   num++;addText('F2',8.5,39,y,String(num)+'.','0.16 0.45 0.30');
    const quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
-   const fontSize=9.2, charWidth=4.65, left=62, right=556, available=right-left;
-   const badgeWidth=quantityText?quantityText.length*4.35+10:0;
-   const maxChars=Math.floor(available/charWidth);
+   const fontSize=9.2, left=62, right=556, available=right-left, gap=28;
+   // Helvetica-Bold AFM widths (1/1000 em), used to position the badge
+   // from the actual rendered text width rather than an average char guess.
+   const widths={
+    ' ':278,'!':333,'"':474,'#':556,'$':556,'%':889,'&':722,"'":238,'(':333,')':333,'*':389,'+':584,',':278,'-':333,'.':278,'/':278,
+    '0':556,'1':556,'2':556,'3':556,'4':556,'5':556,'6':556,'7':556,'8':556,'9':556,':':333,';':333,'<':584,'=':584,'>':584,'?':611,'@':975,
+    'A':722,'B':667,'C':722,'D':722,'E':667,'F':611,'G':778,'H':722,'I':278,'J':500,'K':667,'L':556,'M':833,'N':722,'O':778,'P':667,'Q':778,'R':722,'S':667,'T':611,'U':722,'V':667,'W':944,'X':667,'Y':667,'Z':611,
+    '[':333,'\\':278,']':333,'^':584,'_':556,'`':333,'{':389,'|':280,'}':389,'~':584
+   };
+   const textWidth=(txt,size=fontSize)=>Array.from(txt).reduce((sum,ch)=>sum+(widths[ch]??556),0)*size/1000;
+   const badgeWidth=quantityText?textWidth(quantityText,8.8)+12:0;
+   const maxNameWidth=quantityText?available:available;
    const words=String(item.name||'').trim().split(/\s+/).filter(Boolean);
-   const lines=[];let current='';
+   const lines=[];let line='';
    words.forEach(word=>{
-    const candidate=current?current+' '+word:word;
-    if(candidate.length>maxChars&&current){lines.push(current);current=word;}
-    else current=candidate;
+    const candidate=line?line+' '+word:word;
+    if(textWidth(candidate)>maxNameWidth&&line){lines.push(line);line=word;}
+    else line=candidate;
    });
-   if(current)lines.push(current);
-   let last=lines[lines.length-1]||'';
-   const badgeFits=quantityText && (last.length*charWidth+12+badgeWidth<=available);
-   const separateBadge=quantityText&&!badgeFits;
-   const requiredHeight=lines.length*10.5+(separateBadge?10.5:0)+2;
-   if(y-requiredHeight<34)continuePage(supplier);
-   lines.forEach((line,i)=>{
-    addText('F2',fontSize,left,y,line,'0.09 0.12 0.10');
+   if(line)lines.push(line);
+   // If a single unbreakable token is wider than the page, split it safely.
+   for(let i=0;i<lines.length;i++){
+    if(textWidth(lines[i])>available){
+     let token=lines[i], chunks=[], chunk='';
+     for(const ch of token){if(textWidth(chunk+ch)>available&&chunk){chunks.push(chunk);chunk=ch;}else chunk+=ch;}
+     if(chunk)chunks.push(chunk);
+     lines.splice(i,1,...chunks);i+=chunks.length-1;
+    }
+   }
+   const lastLine=lines[lines.length-1]||'';
+   const badgeFits=!!quantityText && textWidth(lastLine)+gap+badgeWidth<=available;
+   const badgeOnNewLine=!!quantityText&&!badgeFits;
+   const rowStep=10.0, badgeStep=10.5;
+   const requiredHeight=lines.length*rowStep+(badgeOnNewLine?badgeStep:0)+4;
+   if(y-requiredHeight<38)continuePage(supplier);
+   num++;
+   addText('F2',8.5,39,y,String(num)+'.','0.16 0.45 0.30');
+   lines.forEach((txt,i)=>{
+    addText('F2',fontSize,left,y,txt,'0.09 0.12 0.10');
     if(badgeFits&&i===lines.length-1){
-     const qx=left+line.length*charWidth+12;
-     commands.push('0.88 0.94 0.90 rg '+(qx-4)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
+     const qx=left+textWidth(txt)+gap;
+     commands.push('0.88 0.94 0.90 rg '+(qx-5)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
      addText('F2',8.8,qx,y-0.2,quantityText,'0.05 0.28 0.17');
     }
-    y-=10.5;
+    y-=rowStep;
    });
-   if(separateBadge){
-    commands.push('0.88 0.94 0.90 rg '+(left-4)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
+   if(badgeOnNewLine){
+    commands.push('0.88 0.94 0.90 rg '+(left-5)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
     addText('F2',8.8,left,y-0.2,quantityText,'0.05 0.28 0.17');
-    y-=10.5;
+    y-=badgeStep;
    }
-   commands.push('0.88 0.91 0.89 RG 0.25 w 39 '+(y-1.5)+' m 561 '+(y-1.5)+' l S');
-   y-=2.5;
+   commands.push('0.88 0.91 0.89 RG 0.2 w 39 '+(y-1)+' m 561 '+(y-1)+' l S');
+   y-=1.2;
   });
   y-=3;
  });
@@ -288,7 +307,7 @@ function buildPdf(order){
  const quoteWords=quote.split(/\s+/);let quoteLines=[],quoteLine='';
  quoteWords.forEach(word=>{const candidate=quoteLine?quoteLine+' '+word:word;if(candidate.length>82&&quoteLine){quoteLines.push(quoteLine);quoteLine=word;}else quoteLine=candidate;});
  if(quoteLine)quoteLines.push(quoteLine);
- const footerHeight=24+quoteLines.length*12+42;
+ const footerHeight=18+quoteLines.length*10+12;
  if(y<footerHeight+28)continuePage();
  commands.push('0.82 0.87 0.83 RG 0.7 w 39 '+(y-5)+' m 556 '+(y-5)+' l S');
  y-=16;
