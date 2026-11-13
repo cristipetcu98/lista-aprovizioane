@@ -1,10 +1,8 @@
-MATI MARKET – VERSIUNEA 14 FINALĂ
+MATI MARKET – VERSIUNEA 15
 
-Bază: V13, aprobată de utilizator.
-Modificare:
-- Textul denumirilor produselor mărit de la 9,2 la 10,5 pt.
-- Textul cantității mărit de la 8,8 la 9,6 pt.
-- Spațiul dintre denumire și cantitate este păstrat la aproximativ 1 cm.
-- Lățimile sunt calculate după dimensiunea reală a fontului; denumirile lungi se împart automat fără suprapuneri.
-- Spațierea verticală a fost ajustată pentru noua dimensiune a textului.
-Toate celelalte funcții și configurări rămân cele din V13.
+Bază: V14.
+Corecție iPhone:
+- Câmpurile editabile, inclusiv cantitatea, au font-size minim 16px.
+- Safari iOS nu ar trebui să mai facă zoom automat la focalizarea câmpului.
+- Service Worker și start_url actualizate pentru publicarea versiunii noi.
+PDF-ul mărit și generatorul PDF din V14 sunt păstrate neschimbate.

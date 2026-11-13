@@ -3,7 +3,7 @@
   "name": "Mati Market – Aprovizionare",
   "short_name": "Mati Market",
   "description": "Aplicație locală pentru lista de aprovizionare Mati Market",
-  "start_url": "./?app=v13",
+  "start_url": "./?app=v15",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f7f5",

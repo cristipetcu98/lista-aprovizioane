@@ -1,4 +1,4 @@
-const CACHE='mati-market-v13-final';
+const CACHE='mati-market-v15-final';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
