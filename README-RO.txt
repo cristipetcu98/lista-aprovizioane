@@ -1,12 +1,10 @@
-MATI MARKET – VERSIUNEA 9 FINALĂ
+MATI MARKET – VERSIUNEA 11 FINALĂ
 
-Această versiune păstrează interfața și funcțiile din Mati-Market-FINAL-v8.
-Corecții:
-- Căutarea cere potrivirea tuturor cuvintelor introduse; căutarea „Pan” nu mai returnează produse fără legătură.
-- Service Worker v9: actualizare mai sigură, încărcare network-first pentru paginile HTML și fallback offline.
-- Manifest PWA aliniat la rădăcina aplicației existente.
-
-Publicare:
-Înlocuiește în repository-ul existent toate cele 6 fișiere din rădăcină.
-Nu schimba repository-ul sau adresa GitHub Pages.
-Înainte de actualizare, exportă un Backup JSON din aplicația curentă.
+Bază: V10 FINAL.
+Corecție PDF:
+- Denumirile produselor nu mai sunt trunchiate pentru a face loc cantității.
+- Denumirile lungi se împart pe două sau mai multe rânduri.
+- Cantitatea apare imediat după ultima linie a denumirii dacă încape; dacă nu, apare pe rândul următor.
+- Înălțimea rândului PDF se adaptează automat, fără suprapuneri.
+Restul fișierelor și funcțiilor sunt păstrate din V10.
+Înainte de publicare, exportă Backup JSON.

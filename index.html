@@ -249,15 +249,37 @@ function buildPdf(order){
    num++;addText('F2',8.5,39,y,String(num)+'.','0.16 0.45 0.30');
    let quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
    if(quantityText.length>38)quantityText=quantityText.slice(0,35)+'...';
-   const quantityWidth=quantityText?quantityText.length*5.5+10:0;
-   const maxName=quantityText?Math.max(12,Math.floor((556-62-quantityWidth-18)/5.4)):Math.floor((556-62)/5.4);
-   const shown=item.name.length>maxName?item.name.slice(0,maxName-1)+'...':item.name;
-   addText('F2',9.5,62,y,shown,'0.09 0.12 0.10');
-   if(quantityText){
-    const quantityX=62+shown.length*5.4+9;
-    const pillX=quantityX-5;
-    commands.push('0.88 0.94 0.90 rg '+pillX+' '+(y-5)+' '+(quantityWidth)+' 17 re f');
+   const badgeWidth=quantityText?quantityText.length*4.9+12:0;
+   const fullWidth=499;
+   const charWidth=5.05;
+   const maxLineChars=Math.max(20,Math.floor(fullWidth/charWidth));
+   const nameWords=String(item.name||'').split(/\\s+/).filter(Boolean);
+   const nameLines=[];let nameLine='';
+   nameWords.forEach(word=>{
+    const candidate=nameLine?nameLine+' '+word:word;
+    if(candidate.length>maxLineChars&&nameLine){nameLines.push(nameLine);nameLine=word;}
+    else nameLine=candidate;
+   });
+   if(nameLine)nameLines.push(nameLine);
+   const lastLine=nameLines[nameLines.length-1]||'';
+   const badgeOnLastLine=quantityText&&(lastLine.length*charWidth+9+badgeWidth<=fullWidth);
+   const extraBadgeLine=quantityText&&!badgeOnLastLine;
+   const rowHeight=nameLines.length*12+(extraBadgeLine?14:0)+6;
+   if(y-rowHeight<42)continuePage(supplier);
+   nameLines.forEach((line,lineIndex)=>{
+    addText('F2',9.5,62,y,line,'0.09 0.12 0.10');
+    if(badgeOnLastLine&&lineIndex===nameLines.length-1){
+     const quantityX=62+line.length*charWidth+9;
+     commands.push('0.88 0.94 0.90 rg '+(quantityX-5)+' '+(y-5)+' '+badgeWidth+' 17 re f');
+     addText('F2',9.4,quantityX,y,quantityText,'0.05 0.28 0.17');
+    }
+    y-=12;
+   });
+   if(extraBadgeLine){
+    const quantityX=62;
+    commands.push('0.88 0.94 0.90 rg '+(quantityX-5)+' '+(y-5)+' '+badgeWidth+' 17 re f');
     addText('F2',9.4,quantityX,y,quantityText,'0.05 0.28 0.17');
+    y-=14;
    }
    commands.push('0.88 0.91 0.89 RG 0.35 w 39 '+(y-8)+' m 561 '+(y-8)+' l S');y-=18;
   });
