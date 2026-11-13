@@ -246,7 +246,7 @@ function buildPdf(order){
   commands.push('0.92 0.95 0.93 rg 34 '+(y-4)+' 527 15 re f');addText('F2',9,39,y,supplier,'0.09 0.25 0.19');y-=15;
   items.forEach(item=>{
    const quantityText=item.quantity?'CANTITATE: '+pdfAscii(item.quantity):'';
-   const fontSize=9.2, left=62, right=556, available=right-left, gap=28;
+   const fontSize=10.5, left=62, right=556, available=right-left, gap=28;
    // Helvetica-Bold AFM widths (1/1000 em), used to position the badge
    // from the actual rendered text width rather than an average char guess.
    const widths={
@@ -256,7 +256,7 @@ function buildPdf(order){
     '[':333,'\\':278,']':333,'^':584,'_':556,'`':333,'{':389,'|':280,'}':389,'~':584
    };
    const textWidth=(txt,size=fontSize)=>Array.from(txt).reduce((sum,ch)=>sum+(widths[ch]??556),0)*size/1000;
-   const badgeWidth=quantityText?textWidth(quantityText,8.8)+12:0;
+   const badgeWidth=quantityText?textWidth(quantityText,9.6)+12:0;
    const maxNameWidth=quantityText?available:available;
    const words=String(item.name||'').trim().split(/\s+/).filter(Boolean);
    const lines=[];let line='';
@@ -278,7 +278,7 @@ function buildPdf(order){
    const lastLine=lines[lines.length-1]||'';
    const badgeFits=!!quantityText && textWidth(lastLine)+gap+badgeWidth<=available;
    const badgeOnNewLine=!!quantityText&&!badgeFits;
-   const rowStep=10.0, badgeStep=10.5;
+   const rowStep=12.0, badgeStep=12.5;
    const requiredHeight=lines.length*rowStep+(badgeOnNewLine?badgeStep:0)+4;
    if(y-requiredHeight<38)continuePage(supplier);
    num++;
@@ -287,14 +287,14 @@ function buildPdf(order){
     addText('F2',fontSize,left,y,txt,'0.09 0.12 0.10');
     if(badgeFits&&i===lines.length-1){
      const qx=left+textWidth(txt)+gap;
-     commands.push('0.88 0.94 0.90 rg '+(qx-5)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
-     addText('F2',8.8,qx,y-0.2,quantityText,'0.05 0.28 0.17');
+     commands.push('0.88 0.94 0.90 rg '+(qx-5)+' '+(y-4)+' '+badgeWidth+' 14 re f');
+     addText('F2',9.6,qx,y-0.2,quantityText,'0.05 0.28 0.17');
     }
     y-=rowStep;
    });
    if(badgeOnNewLine){
-    commands.push('0.88 0.94 0.90 rg '+(left-5)+' '+(y-3.5)+' '+badgeWidth+' 12 re f');
-    addText('F2',8.8,left,y-0.2,quantityText,'0.05 0.28 0.17');
+    commands.push('0.88 0.94 0.90 rg '+(left-5)+' '+(y-4)+' '+badgeWidth+' 14 re f');
+    addText('F2',9.6,left,y-0.2,quantityText,'0.05 0.28 0.17');
     y-=badgeStep;
    }
    commands.push('0.88 0.91 0.89 RG 0.2 w 39 '+(y-1)+' m 561 '+(y-1)+' l S');

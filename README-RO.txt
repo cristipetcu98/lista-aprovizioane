@@ -1,12 +1,10 @@
-MATI MARKET – VERSIUNEA 13 FINALĂ VERIFICATĂ
+MATI MARKET – VERSIUNEA 14 FINALĂ
 
-Bază: V12.
-Corecție majoră PDF:
-- Poziția cantității se calculează pe baza lățimilor reale ale caracterelor Helvetica Bold, nu pe estimări de caractere.
-- Cantitatea nu se poate suprapune peste denumire.
-- Denumirile complete sunt păstrate și împărțite în rânduri după lățimea disponibilă.
-- Cantitatea apare după ultima linie a denumirii, la distanță de aproximativ 1 cm dacă încape; altfel apare pe rândul imediat următor.
-- Rândurile sunt compacte, pentru a permite aproximativ 50 produse pe pagină când denumirile sunt scurte/medii. Denumirile lungi și cantitățile complexe pot necesita mai mult spațiu.
-- Service Worker și manifest actualizate pentru a forța preluarea noii versiuni.
-Restul funcțiilor sunt păstrate din V12.
-Înainte de publicare, exportă Backup JSON.
+Bază: V13, aprobată de utilizator.
+Modificare:
+- Textul denumirilor produselor mărit de la 9,2 la 10,5 pt.
+- Textul cantității mărit de la 8,8 la 9,6 pt.
+- Spațiul dintre denumire și cantitate este păstrat la aproximativ 1 cm.
+- Lățimile sunt calculate după dimensiunea reală a fontului; denumirile lungi se împart automat fără suprapuneri.
+- Spațierea verticală a fost ajustată pentru noua dimensiune a textului.
+Toate celelalte funcții și configurări rămân cele din V13.
