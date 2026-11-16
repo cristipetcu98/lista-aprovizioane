@@ -1,8 +1,9 @@
-MATI MARKET – VERSIUNEA 15
+MATI MARKET – VERSIUNEA 17
 
-Bază: V14.
-Corecție iPhone:
-- Câmpurile editabile, inclusiv cantitatea, au font-size minim 16px.
-- Safari iOS nu ar trebui să mai facă zoom automat la focalizarea câmpului.
-- Service Worker și start_url actualizate pentru publicarea versiunii noi.
-PDF-ul mărit și generatorul PDF din V14 sunt păstrate neschimbate.
+Bază: V16.
+Modificare PDF:
+- Eliminat complet sloganul „MINTEA LA PROFIT, MÂINILE LA CARTOFI!”.
+- Eliminat chenarul verde rezervat sloganului.
+- Păstrate titlul „LISTA DE APROVIZIONARE”, data emiterii și toate celelalte funcții.
+- Păstrat fontul mărit din V14/V16, poziționarea cantităților și corecția anti-zoom iPhone.
+Înainte de publicare, exportă Backup JSON.

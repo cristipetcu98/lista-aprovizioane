@@ -230,7 +230,7 @@ function orderGroups(order){
 function buildPdf(order){
  const groups=orderGroups(order),pages=[];let commands=[],y=806,num=0;
  const addText=(font,size,x,yy,text,color='0.09 0.14 0.11')=>commands.push(`${color} rg BT /${font} ${size} Tf ${x} ${yy} Td (${pdfEscape(text)}) Tj ET`);
- const newPage=()=>{if(commands.length)pages.push(commands.join('\n'));commands=[];y=806;addText('F2',17,34,y,'LISTA DE APROVIZIONARE','0.09 0.25 0.19');y-=20;commands.push('0.91 0.95 0.92 rg 34 '+(y-21)+' 527 29 re f');commands.push('0.16 0.38 0.27 RG 0.8 w 34 '+(y-21)+' 527 29 re S');addText('F2',13,113,y-12,'MINTEA LA PROFIT, MAINILE LA CARTOFI!','0.08 0.29 0.19');y-=43;addText('F1',9,34,y,'DATA EMITERII: '+pdfAscii(order.date||new Date(order.timestamp||Date.now()).toLocaleString('ro-RO')),'0.25 0.30 0.26');y-=22;commands.push('0.09 0.25 0.19 RG 0.8 w 34 '+y+' m 561 '+y+' l S');y-=17};
+ const newPage=()=>{if(commands.length)pages.push(commands.join('\n'));commands=[];y=806;addText('F2',17,34,y,'LISTA DE APROVIZIONARE','0.09 0.25 0.19');y-=24;addText('F1',9,34,y,'DATA EMITERII: '+pdfAscii(order.date||new Date(order.timestamp||Date.now()).toLocaleString('ro-RO')),'0.25 0.30 0.26');y-=22;commands.push('0.09 0.25 0.19 RG 0.8 w 34 '+y+' m 561 '+y+' l S');y-=17};
  const continuePage=(supplier='')=>{pages.push(commands.join('\n'));commands=[];y=806;addText('F2',17,34,y,'LISTA DE APROVIZIONARE - CONTINUARE','0.09 0.25 0.19');y-=30;if(supplier){commands.push('0.92 0.95 0.93 rg 34 '+(y-4)+' 527 15 re f');addText('F2',9,39,y,supplier+' (CONTINUARE)','0.09 0.25 0.19');y-=18}};
  newPage();
  if(order.note&&String(order.note).trim()){
@@ -302,17 +302,6 @@ function buildPdf(order){
   });
   y-=3;
  });
- // Motivational footer is always placed after the complete shopping list.
- const quote='AI, TRADING, BURSA, INVESTITII... TOATE SUNT BUNE SI FRUMOASE, DAR CARTOFII TOT NOI II CARAM! CE AI IN MANA NU-I MINCIUNA. PUNE OSUL LA TREABA - NOROCUL II GASESTE MAI USOR PE CEI CARE NU STAU DEGEABA!';
- const quoteWords=quote.split(/\s+/);let quoteLines=[],quoteLine='';
- quoteWords.forEach(word=>{const candidate=quoteLine?quoteLine+' '+word:word;if(candidate.length>82&&quoteLine){quoteLines.push(quoteLine);quoteLine=word;}else quoteLine=candidate;});
- if(quoteLine)quoteLines.push(quoteLine);
- const footerHeight=18+quoteLines.length*10+12;
- if(y<footerHeight+28)continuePage();
- commands.push('0.82 0.87 0.83 RG 0.7 w 39 '+(y-5)+' m 556 '+(y-5)+' l S');
- y-=16;
- quoteLines.forEach(line=>{addText('F3',8.2,48,y,line,'0.25 0.31 0.27');y-=10;});
- y-=5;
  pages.push(commands.join('\n'));
  const objects=[];const add=o=>(objects.push(o),objects.length);const catalogId=add('');const pagesId=add('');const font1=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');const font2=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');const font3=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>');const pageIds=[];
  pages.forEach(content=>{const stream=content+'\n';const streamId=add(`<< /Length ${new TextEncoder().encode(stream).length} >>\nstream\n${stream}endstream`);const pageId=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 ${font1} 0 R /F2 ${font2} 0 R /F3 ${font3} 0 R >> >> /Contents ${streamId} 0 R >>`);pageIds.push(pageId)});
